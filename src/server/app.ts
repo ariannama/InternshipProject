@@ -1,5 +1,5 @@
 //REMINDER to connect to docker before running (docker start app-db)
-import { GITSECRET, TLSECRET, conString } from "./constants";
+import { GIT_SECRET, TL_SECRET, conString } from "./constants";
 import * as request from "request-promise-native";
 import * as decoder from "jwt-decode";
 import { IExchangeCodeResponse } from "../interfaces/IExchangeCodeResponse";
@@ -32,11 +32,11 @@ app.post("/callback", async (req, res) => {
         formData: {
             grant_type: "authorization_code",
             client_id: "test-eb3e42",
-            client_secret: TLSECRET,
-            redirect_uri: "http://localhost:3000/callback",
+            client_secret: TL_SECRET,
+            redirect_uri: "http://localhost:3001/callback.html",
             code: code
         },
-        resolveWithFullResponse: false,
+        // resolveWithFullResponse: false,
         json: true
     });
     let access_token = response.access_token;
@@ -72,14 +72,14 @@ app.post("/callback", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-    let code = req.query.code;
+    let code = req.body.code;
     res.send("ok");
-    const response: IExchangeCodeResponse = await request.post("https://github.com/login/oauth/access_token", {
+    const response: IExchangeCodeResponse = await request.post(`https://github.com/login/oauth/access_token`, {
         formData: {
             client_id: "3e50bed2239aa1a7b041",
-            client_secret: GITSECRET,
+            client_secret: GIT_SECRET,
             code: code,
-            redirect_uri: "http://localhost:3000/login"
+            redirect_uri: "http://localhost:3001/login.html"
         },
         resolveWithFullResponse: false,
         json: true
@@ -87,4 +87,6 @@ app.post("/login", async (req, res) => {
     let access_token = response.access_token;
     //res.redirect(`/callback.html?access_token=${access_token}`);
     console.log(access_token);
+    let decoded = decoder<IDecodeToken>(access_token);
+    console.log(decoded);
 });
