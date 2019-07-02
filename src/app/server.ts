@@ -1,21 +1,23 @@
-//REMINDER to connect to docker before running (docker start app-db)
-import {  TL_SECRET, conString } from "./constants";
-import * as request from "request-promise-native";
-import * as decoder from "jwt-decode";
-import { IExchangeCodeResponse } from "../../interfaces/IExchangeCodeResponse";
-import { IDecodeToken } from "../../interfaces/IDecodeToken";
-import * as express from "express";
-import * as pg from "pg";
 import * as cors from "cors";
-import passport from "./passport";
+import * as decoder from "jwt-decode";
+import * as express from "express";
+import { Client } from "pg";
+import * as request from "request-promise-native";
+// import passport from "./passport";
+import { conString, TL_SECRET } from "./constants";
+import { IDecodeToken } from "../interfaces/IDecodeToken";
+import { IExchangeCodeResponse } from "../interfaces/IExchangeCodeResponse";
+import { router } from "./routes/auth";
+//REMINDER to connect to docker before running (docker start app-db)
 
 var app = express();
-var client = new pg.Client(conString);
+var client = new Client(conString);
 
 app.use(cors());
 app.use(express.json());
-app.use(passport.initialize());
+// app.use(passport.initialize());
 app.use(express.static('public'));
+app.use('/', router);
 
 (async () => {
     try {
@@ -76,14 +78,7 @@ app.post("/callback", async (req, res) => {
 });
 //Handling github authentication
 
-app.get('/login',
-    passport.authenticate('github')
-);
 
-app.get('/login/callback',
-    passport.authenticate('github', {failureRedirect: '/login'}),
-    function(_, res) {
-        console.log("hi");
-        // Successful authentication, redirect home.
-        res.redirect('http://localhost:3001/hello.html');
-});
+
+
+

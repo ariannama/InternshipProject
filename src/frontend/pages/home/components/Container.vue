@@ -44,4 +44,3 @@ export default class Container extends ContainerProps {
 }
 </script>
 
-<style src ="../../assets/tailwind.css">

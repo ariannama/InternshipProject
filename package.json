@@ -19,7 +19,7 @@
     "vue-template-compiler": "^2.6.10"
   },
   "scripts": {
-    "start": "node ./dist/server/app.js",
+    "start": "node ./dist/app/server.js",
     "clean": "rm -rf dist public",
     "build": "yarn clean && yarn build:server && yarn build:frontend",
     "build:server": "tsc -p .",
@@ -30,6 +30,7 @@
     "@types/cors": "^2.8.5",
     "@types/jwt-decode": "^2.2.1",
     "@types/passport-github": "^1.1.5",
+    "@types/passport-local": "^1.0.33",
     "@types/vue": "^2.0.0",
     "cors": "^2.8.5",
     "docker": "^1.0.0",
@@ -40,6 +41,7 @@
     "passport": "^0.4.0",
     "passport-github": "^1.1.0",
     "passport-github2": "^0.1.11",
+    "passport-local": "^1.0.0",
     "pg": "^7.11.0",
     "tailwindcss": "^1.0.4",
     "vue": "^2.6.10",
