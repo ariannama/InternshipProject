@@ -10,7 +10,7 @@
       <Button
         class="flex-1 justify-center items-center font-semibold rounded-full px-10 py-5 mx-3 leading-normal bg-white border border-blue-400 text-blue hover:bg-blue-400 hover:text-white"
         text="Sign in"
-        link="https://github.com/login/oauth/authorize?client_id=3e50bed2239aa1a7b041&redirect_uri=http://localhost:3001/login.html"
+        link="http://localhost:3000/login"
       />
     </div>
     <div class="flex">
@@ -26,8 +26,8 @@
 <script lang="ts">
 import Vue from "vue";
 import Component from "vue-class-component";
-import Button from "./Button.vue";
-import Header from "./Header.vue";
+import Button from "../../components/Button.vue";
+import Header from "../../components/Header.vue";
 
 const ContainerProps = Vue.extend({});
 

@@ -19,16 +19,19 @@
     "vue-template-compiler": "^2.6.10"
   },
   "scripts": {
-    "start:server": "node ./dist/server/app.js",
+    "start": "node ./dist/server/app.js",
+    "clean": "rm -rf dist public",
+    "build": "yarn clean && yarn build:server && yarn build:frontend",
     "build:server": "tsc -p .",
-    "build:frontend": "parcel serve --out-dir dist/frontend src/frontend/*.html -p 3001",
-    "clean": "rm -rf dist"
+    "build:frontend": "parcel build -d public src/frontend/pages/**/*.html",
+    "dev": "yarn build && yarn start"
   },
   "dependencies": {
     "@types/cors": "^2.8.5",
     "@types/jwt-decode": "^2.2.1",
     "@types/passport-github": "^1.1.5",
     "@types/vue": "^2.0.0",
+    "cors": "^2.8.5",
     "docker": "^1.0.0",
     "express": "^4.17.1",
     "inspector": "^0.5.0",
@@ -36,6 +39,7 @@
     "parcel-bundler": "^1.12.3",
     "passport": "^0.4.0",
     "passport-github": "^1.1.0",
+    "passport-github2": "^0.1.11",
     "pg": "^7.11.0",
     "tailwindcss": "^1.0.4",
     "vue": "^2.6.10",
