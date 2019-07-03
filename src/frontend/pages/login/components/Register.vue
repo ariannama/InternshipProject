@@ -1,7 +1,11 @@
 <template>
   <form>
-    <input type="text" placeholder="email" v-model="email">
-    <input type="password" placeholder="password" v-model="password">
+    <label for="email">Enter your email:</label><br />
+    <input type="email" placeholder="E-mail" v-model="email"><br/>
+    <label for="password2">Enter your password (must have at least 6 characters):</label><br/>
+    <input type="password" placeholder="Password" v-model="password"><br/>
+    <label for="password2">Confirm your password:</label><br/>
+    <input type="password" placeholder="Confirm your password" v-model="password2"><br/>
     <button type="submit" @click.prevent="register" >Submit</button>
   </form>
 </template>
@@ -10,7 +14,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-const LoginProps = Vue.extend({
+const RegisterProps = Vue.extend({
+  name: "Register",
   props: {
     text: String,
     link: String
@@ -18,9 +23,10 @@ const LoginProps = Vue.extend({
 });
 
 @Component
-export default class Login extends LoginProps {
-  private email = "john@doe.com";
+export default class Register extends RegisterProps {
+  private email = "jon@example.com";
   private password = "password";
+  private password2 = "password";
 
   constructor() {
     super();
@@ -39,13 +45,14 @@ export default class Login extends LoginProps {
         },
         body: JSON.stringify({
             email: this.email,
-            password: this.password
+            password: this.password,
+            password2: this.password2
         })
     }).then((response) => {
         return response.json();
     }).then((body) => {
         const { message } = body;
-        console.log(message);
+        alert(message);
     });
   }
 }
