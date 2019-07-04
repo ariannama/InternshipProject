@@ -1,5 +1,6 @@
 <template>
   <h1>Hello</h1>
+  <h1 v-model="access_token">{{access_token}}</h1>
 </template>
 
 <script lang="ts">
@@ -15,6 +16,8 @@ const CallbackProps = Vue.extend({
 
 @Component
 export default class Callback extends CallbackProps {
+  private access_token; 
+
   constructor() {
     super();
   }
@@ -32,8 +35,12 @@ export default class Callback extends CallbackProps {
         body: JSON.stringify({
             code
         })
-    }).then((_) => {
-        console.log("done");
+    }).then((response) => {
+        return response.json();
+    }).then((body) => {
+        const { success, access_token, refresh_token } = body;
+        if (!success) alert ("We had a technical issue - please, try again");
+        else this.access_token = access_token;
     });
   }
 }

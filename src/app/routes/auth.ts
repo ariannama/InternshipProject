@@ -21,8 +21,13 @@ router.post("/register", async (req, res) => {
         error = "Passwords do not match! Please, try again."
         return res.send({ success: false, message: error });
     }
-    if (password.length < 6){
-        error = "Password must be at least 6 characters! Please, try again."
+    if (password.length < 8){
+        error = "Password must be at least 8 characters! Please, try again."
+        console.log(error);
+        return res.send({ success: false, message: error });
+    }
+    if (password.length < 8){
+        error = "Password must be at least 8 characters! Please, try again."
         console.log(error);
         return res.send({ success: false, message: error });
     }
@@ -48,9 +53,10 @@ router.post("/register", async (req, res) => {
     } 
     
     let encrypted: string;
+    
     try {
         console.log("start");
-        encrypted = await hash(password, 5);
+        encrypted = await hash(password, 12);
         console.log("end");
     } catch(error) {
         console.log("error start");
@@ -73,5 +79,7 @@ router.post("/register", async (req, res) => {
 
     res.send({ success: true, message: "You have succesfully created an account!"});
 });
+
+router.post("/login")
 
 export { router }

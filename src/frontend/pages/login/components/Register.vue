@@ -24,9 +24,9 @@ const RegisterProps = Vue.extend({
 
 @Component
 export default class Register extends RegisterProps {
-  private email = "jon@example.com";
-  private password = "password";
-  private password2 = "password";
+  private email;
+  private password;
+  private password2;
 
   constructor() {
     super();

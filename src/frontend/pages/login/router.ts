@@ -1,17 +1,22 @@
-import Vue from 'vue';
+import Vue from "vue";
 import VueRouter from "vue-router";
 import register from "./components/Register.vue";
-import '../../../../assets/tailwind.css';
+import login from "./components/Login.vue";
+import "../../../../assets/tailwind.css";
 
 Vue.use(VueRouter);
 
-// const useComponent = component => () =>
-//   import(`./components/${component}.vue`);
-
-export const routes = [
-    {
-        path: "/",
-        name: 'register',
-        component: register
-    }
-]
+export default new VueRouter({
+    routes: [
+        {
+            path: "/register",
+            name: "register",
+            component: register
+        },
+        {
+            path: "/login",
+            name: "login",
+            component: login
+        }
+    ]
+});
