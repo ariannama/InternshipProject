@@ -8,13 +8,14 @@
             "type": "node",
             "request": "launch",
             "name": "AppProject",
-            "preLaunchTask": "npm: build:server",
+            "preLaunchTask": "npm: dev",
             "runtimeExecutable": "node",
-            "program": "${workspaceFolder}/dist/server/app.js",
+            "program": "${workspaceFolder}/dist/app/server.js",
             "outFiles": [ "${workspaceFolder}/dist/*.js" ],
             "sourceMaps": true,
             "protocol": "inspector",
             "outputCapture": "std",
+            "internalConsoleOptions": "openOnSessionStart",
             "env": {
             }
         }
