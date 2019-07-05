@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
     let result: QueryResult;
 
     const selectQuery = {
-        text: "SELECT FROM truelayer WHERE client_id = $1",
+        text: "SELECT FROM tokens WHERE credentials_id = $1",
         values: [subject]
     };
 
@@ -46,14 +46,14 @@ router.post("/", async (req, res) => {
 
     if (result.rowCount > 0) {
         let deleteParams = {
-            text: "DELETE FROM truelayer WHERE client_id = $1",
+            text: "DELETE FROM tokens WHERE credentials_id = $1",
             values: [subject]
         };
         result = await client.query(deleteParams);
     }
 
     const insertQuery = {
-        text: "INSERT INTO truelayer(access_token, refresh_token, client_id) VALUES($1, $2, $3)",
+        text: "INSERT INTO tokens(access_token, refresh_token, credentials_id) VALUES($1, $2, $3)",
         values: [access_token, refresh_token, subject]
     };
     try {

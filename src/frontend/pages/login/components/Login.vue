@@ -1,14 +1,6 @@
 <template>
     <div>
-      <form>
-      <label for="email">Enter your email:</label><br />
-      <input type="email" placeholder="E-mail" v-model="email"><br/>
-      <label for="password2">Enter your password (must have at least 6 characters):</label><br/>
-      <input type="password" placeholder="Password" v-model="password"><br/>
-      <label for="password2">Confirm your password:</label><br/>
-      <input type="password" placeholder="Confirm your password" v-model="password2"><br/>
-      <button type="submit" @click.prevent="register" >Submit</button>
-    </form>
+    <h1>HIIIII</h1>
   </div>
 </template>
 

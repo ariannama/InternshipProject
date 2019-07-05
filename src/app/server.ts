@@ -7,8 +7,7 @@ import { Client } from "pg";
 import { conString } from "./constants";
 // import { IDecodeToken } from "../interfaces/IDecodeToken";
 // import { IExchangeCodeResponse } from "../interfaces/IExchangeCodeResponse";
-import { router } from "./routes/auth";
-import { router as ConsentRouter } from "./routes/consent";
+import { router } from "./routes/router";
 //REMINDER to connect to docker before running (docker start app-db)
 
 var app = express();
@@ -17,8 +16,7 @@ var client = new Client(conString);
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
-app.use('/', router);
-app.use('/callback', ConsentRouter);
+app.use(router);
 
 (async () => {
     try {

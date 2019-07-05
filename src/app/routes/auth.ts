@@ -33,7 +33,7 @@ router.post("/register", async (req, res) => {
     }
 
     const selectQuery = {
-        text: "SELECT FROM auth WHERE email = $1",
+        text: "SELECT FROM users WHERE email = $1",
         values: [email]
     };
 
@@ -65,7 +65,7 @@ router.post("/register", async (req, res) => {
     }
 
     const insertQuery = {
-        text: "INSERT INTO auth(email, password) VALUES($1, $2)",
+        text: "INSERT INTO users(id, email, password) VALUES($1, $2)",
         values: [email, encrypted]
     };
 
@@ -80,6 +80,5 @@ router.post("/register", async (req, res) => {
     res.send({ success: true, message: "You have succesfully created an account!"});
 });
 
-router.post("/login")
 
 export { router }

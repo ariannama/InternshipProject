@@ -1,6 +1,8 @@
 <template>
-  <h1>Hello</h1>
-  <h1 v-model="access_token">{{access_token}}</h1>
+<div>
+  <h1>llo</h1>
+  <div><h1>{{token}}</h1></div>
+</div>
 </template>
 
 <script lang="ts">
@@ -16,12 +18,13 @@ const CallbackProps = Vue.extend({
 
 @Component
 export default class Callback extends CallbackProps {
-  private access_token; 
+  token: string | undefined = "decl";
 
   constructor() {
     super();
   }
   mounted() {
+    this.token = "init";
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
     // alert(code);
@@ -36,11 +39,15 @@ export default class Callback extends CallbackProps {
             code
         })
     }).then((response) => {
+    
         return response.json();
     }).then((body) => {
-        const { success, access_token, refresh_token } = body;
-        if (!success) alert ("We had a technical issue - please, try again");
-        else this.access_token = access_token;
+        let { success, access_token, refresh_token } = body;
+        this.token = access_token;
+        alert(access_token);
+        alert(this.token);
+        // if (!success) alert ("We had a technical issue - please, try again");
+
     });
   }
 }

@@ -14,7 +14,7 @@ export default new VueRouter({
             component: register
         },
         {
-            path: "/login",
+            path: "/hi",
             name: "login",
             component: login
         }
