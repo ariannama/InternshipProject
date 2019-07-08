@@ -1,11 +1,9 @@
 <template>
   <form>
-    <label for="email">Enter your email:</label><br />
+    <label for="email">E-mail:</label><br />
     <input type="email" placeholder="E-mail" v-model="email"><br/>
-    <label for="password2">Enter your password (must have at least 6 characters):</label><br/>
-    <input type="password" placeholder="Password" v-model="password"><br/>
-    <label for="password2">Confirm your password:</label><br/>
-    <input type="password" placeholder="Confirm your password" v-model="password2"><br/>
+    <label for="password2">Password:</label><br/>
+    <input type="email" placeholder="Password" v-model="password"><br/>
     <button type="submit" @click.prevent="register" >Submit</button>
   </form>
 </template>
@@ -14,8 +12,8 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-const RegisterProps = Vue.extend({
-  name: "Register",
+const LoginProps = Vue.extend({
+  name: "Login",
   props: {
     text: String,
     link: String
@@ -23,21 +21,16 @@ const RegisterProps = Vue.extend({
 });
 
 @Component
-export default class Register extends RegisterProps {
+export default class Login extends LoginProps {
   private email;
   private password;
-  private password2;
 
   constructor() {
     super();
   }
 
-  doSomething() {
-      alert("something");
-  }
-
   register() {
-    fetch("http://localhost:3000/register", {
+    fetch("http://localhost:3000/auth/login", {
         method: 'POST',
         mode: 'cors',
         headers: {
@@ -45,8 +38,7 @@ export default class Register extends RegisterProps {
         },
         body: JSON.stringify({
             email: this.email,
-            password: this.password,
-            password2: this.password2
+            password: this.password
         })
     }).then((response) => {
         return response.json();

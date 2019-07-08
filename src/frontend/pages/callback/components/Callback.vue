@@ -1,7 +1,8 @@
 <template>
 <div>
-  <h1>llo</h1>
-  <div><h1>{{token}}</h1></div>
+  <h1>Here is the information about your access token:</h1>
+  <div>{{token}}</div>
+  <div>{{cred}}</div>
 </div>
 </template>
 
@@ -19,35 +20,31 @@ const CallbackProps = Vue.extend({
 @Component
 export default class Callback extends CallbackProps {
   token: string | undefined = "decl";
+  cred: string | undefined = "in";
 
   constructor() {
     super();
   }
   mounted() {
-    this.token = "init";
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    // alert(code);
-    fetch("http://localhost:3000/callback", {
+    fetch("http://localhost:3000/callback/callback", {
         method: 'POST',
         mode: 'cors',
         headers: {
             'Content-Type': 'application/json',
-            // 'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: JSON.stringify({
             code
         })
     }).then((response) => {
-    
+      console.log(response);
         return response.json();
     }).then((body) => {
-        let { success, access_token, refresh_token } = body;
+        console.log(body);
+        const { success, access_token, refresh_token, credentials_id, consent_status, consent_status_updated_at, consent_expires_at, display_name} = body;
         this.token = access_token;
-        alert(access_token);
-        alert(this.token);
-        // if (!success) alert ("We had a technical issue - please, try again");
-
+        this.cred = credentials_id;
     });
   }
 }

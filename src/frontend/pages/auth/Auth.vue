@@ -5,7 +5,7 @@
                 <router-link to="/register">Create an account</router-link></br>    
             </li>
             <li>
-                <router-link to="/hi">HI</router-link></br>
+                <router-link to="/">Log into your account</router-link></br>
             </li>
         </ul>
         <router-view></router-view>
@@ -19,7 +19,7 @@ import Login from "./components/Login";
 export default {
     name: 'app',
     components: {
-        Register, Hi
+        Register, Login
     }
 }
 </script>

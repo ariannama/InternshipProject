@@ -1,8 +1,7 @@
 import * as express from "express";
-import * as decoder from "jwt-decode";
 import { Client, QueryResult } from "pg";
 import * as request from "request-promise-native";
-import { IDecodeToken } from "../../interfaces/IDecodeToken";
+import { IMe } from "../../interfaces/IMe";
 import { IExchangeCodeResponse } from "../../interfaces/IExchangeCodeResponse";
 import { conString, TL_SECRET } from "../constants";
 
@@ -10,8 +9,7 @@ var client = new Client(conString);
 client.connect();
 var router = express.Router();
 
-router.post("/", async (req, res) => {
-    console.log("ok1");
+router.post("/callback", async (req, res) => {
     let code = req.body.code;
 
     const response: IExchangeCodeResponse = await request.post("https://auth.truelayer.com/connect/token", {
@@ -28,33 +26,52 @@ router.post("/", async (req, res) => {
 
     let access_token = response.access_token;
     let refresh_token = response.refresh_token;
-    let decoded = decoder<IDecodeToken>(access_token);
-    let subject = decoded.sub;
+
+    const requestMe: any = await request.get("https://api.truelayer.com/data/v1/me", {
+        headers: {
+            Authorization: `Bearer ${access_token}`
+        },
+        resolveWithFullResponse: false,
+        json: true
+    });
+    
+    const metadata: IMe = requestMe.results[0];
+    let credentials_id = metadata.credentials_id;
+    let consent_status = metadata.consent_status;
+    let consent_status_updated_at = metadata.consent_status_updated_at;
+    let consent_expires_at = metadata.consent_expires_at;
+    let display_name = metadata.provider.display_name;
     let result: QueryResult;
 
     const selectQuery = {
         text: "SELECT FROM tokens WHERE credentials_id = $1",
-        values: [subject]
+        values: [credentials_id]
     };
 
     try {
         result = await client.query(selectQuery);
     } catch (e) {
         console.log(e);
-        return res.send({ success: false, access_token: 0, refresh_token: 0});
+        return res.send({ success: false,  
+            access_token: access_token, 
+            refresh_token: refresh_token,
+            credentials_id: credentials_id,
+            consent_status: consent_status,
+            consent_status_updated_at: consent_status_updated_at,
+            consent_expires_at: consent_expires_at });
     }
 
     if (result.rowCount > 0) {
         let deleteParams = {
             text: "DELETE FROM tokens WHERE credentials_id = $1",
-            values: [subject]
+            values: [credentials_id]
         };
         result = await client.query(deleteParams);
     }
 
     const insertQuery = {
         text: "INSERT INTO tokens(access_token, refresh_token, credentials_id) VALUES($1, $2, $3)",
-        values: [access_token, refresh_token, subject]
+        values: [access_token, refresh_token, credentials_id]
     };
     try {
         result = await client.query(insertQuery);
@@ -62,7 +79,18 @@ router.post("/", async (req, res) => {
         console.log(e);
     }
 
-    return res.send({ success: true, access_token: access_token, refresh_token: refresh_token });
+    return res.send({ 
+        success: true, 
+        access_token: access_token, 
+        refresh_token: refresh_token,
+        credentials_id: credentials_id,
+        consent_status: consent_status,
+        consent_status_updated_at: consent_status_updated_at,
+        consent_expires_at: consent_expires_at,
+        display_name: display_name });
+
+
 });
 
 export { router };
+
