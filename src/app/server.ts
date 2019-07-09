@@ -1,11 +1,22 @@
 import * as cors from "cors";
 import * as express from "express";
 import { Client } from "pg";
+import * as redis from "redis";
 import { conString } from "./constants";
 import { router } from "./routes/router";
 
 var app = express();
 var client = new Client(conString);
+var redisClient = redis.createClient();
+export { redisClient };
+
+redisClient.on('connect', function() {
+    console.log('Redis client connected');
+});
+
+redisClient.on('error', function (err) {
+    console.log('Something went wrong ' + err);
+});
 
 app.use(cors());
 app.use(express.json());
