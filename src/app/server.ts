@@ -22,5 +22,5 @@ app.use(router);
     }
 
 
-    app.listen(3000);
+    app.listen(3000, () => console.log("running"));
 })();

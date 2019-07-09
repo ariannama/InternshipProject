@@ -1,6 +1,7 @@
 import * as express from "express";
 import { Client, QueryResult } from "pg";
-import * as request from "request-promise-native";
+//import * as request from "request-promise-native";
+import axios from "axios";
 import { IMe } from "../../interfaces/IMe";
 import { IExchangeCodeResponse } from "../../interfaces/IExchangeCodeResponse";
 import { conString, TL_SECRET } from "../constants";
@@ -12,7 +13,7 @@ var router = express.Router();
 router.post("/callback", async (req, res) => {
     let code = req.body.code;
 
-    const response: IExchangeCodeResponse = await request.post("https://auth.truelayer.com/connect/token", {
+    const response: IExchangeCodeResponse = await axios.post("https://auth.truelayer.com/connect/token", {
         formData: {
             grant_type: "authorization_code",
             client_id: "test-eb3e42",
@@ -27,12 +28,12 @@ router.post("/callback", async (req, res) => {
     let access_token = response.access_token;
     let refresh_token = response.refresh_token;
 
-    const requestMe: any = await request.get("https://api.truelayer.com/data/v1/me", {
+    const requestMe: any = await axios.get("https://api.truelayer.com/data/v1/me", {
         headers: {
             Authorization: `Bearer ${access_token}`
-        },
-        resolveWithFullResponse: false,
-        json: true
+        }
+        // resolveWithFullResponse: false,
+        // json: true
     });
     
     const metadata: IMe = requestMe.results[0];

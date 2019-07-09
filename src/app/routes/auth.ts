@@ -10,12 +10,17 @@ var router = express.Router();
 router.post("/register", async (req, res) => {
     const { email, password, password2 } =  req.body;
     let error: string;
-
+    let email_format = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    let password_format = /\w*[A-Z]\w*/;
 
     if (!email || !password){
         error = "Please fill out all fields and try again";
         console.log(error);
         return res.send({ success: false, message: error });
+    }
+    if(!email.match(email_format)){
+        error = "Please enter a valid e-mail address";
+        return res.send({ success: false, message: error});
     }
     if (password != password2){
         error = "Passwords do not match! Please, try again."
@@ -26,8 +31,8 @@ router.post("/register", async (req, res) => {
         console.log(error);
         return res.send({ success: false, message: error });
     }
-    if (password.length < 8){
-        error = "Password must be at least 8 characters! Please, try again."
+    if (!password.match(password_format)){
+        error = "Passwords must have at least 1 capital letter! Please, try again."
         console.log(error);
         return res.send({ success: false, message: error });
     }
@@ -55,9 +60,7 @@ router.post("/register", async (req, res) => {
     let encrypted: string;
     
     try {
-        console.log("start");
         encrypted = await hash(password, 12);
-        console.log("end");
     } catch(error) {
         console.log("error start");
         console.log(error);
@@ -65,7 +68,7 @@ router.post("/register", async (req, res) => {
     }
 
     const insertQuery = {
-        text: "INSERT INTO users(id, email, password) VALUES($1, $2)",
+        text: "INSERT INTO users(email, password) VALUES($1, $2)",
         values: [email, encrypted]
     };
 
@@ -77,19 +80,24 @@ router.post("/register", async (req, res) => {
         res.send({ success: false, message: error});
     }
 
+    const idQuery = {
+        text: "SELECT id FROM users WHERE email = $1",
+        values: [email]
+    }
+
+    try {
+        await client.query(idQuery);
+    } catch(e) {
+        console.log(e);
+
+    }
+
     res.send({ success: true, message: "You have succesfully created an account!"});
 });
 
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     let error: string;
-
-    let emailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
-    if(!email.match(emailformat)){
-        error = "Please enter a valid e-mail address";
-        return res.send({ success: false, message: error});
-    }
 
     const emailQuery = {
         text: "SELECT FROM users WHERE email = $1",
