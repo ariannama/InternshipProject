@@ -1,96 +1,36 @@
 import * as express from "express";
-import { Client, QueryResult } from "pg";
-//import * as request from "request-promise-native";
-import axios from "axios";
-import { IMe } from "../../interfaces/IMe";
-import { IExchangeCodeResponse } from "../../interfaces/IExchangeCodeResponse";
-import { conString, TL_SECRET } from "../constants";
+import TrueLayer from "../services/truelayer";
+import redis from "../services/redis";
+import { pgClient } from "../server";
 
-var client = new Client(conString);
-client.connect();
 var router = express.Router();
 
-router.post("/callback", async (req, res) => {
-    let code = req.body.code;
+router.get("/callback", async (req, res) => {
+    const code = req.query.code;
+    const { access_token, refresh_token } = await TrueLayer.exchangeCode(code);
+    const credentials_id = await TrueLayer.getCredentials(access_token);
+    await TrueLayer.insertToken(access_token, refresh_token, credentials_id);
 
-    const response: IExchangeCodeResponse = await axios.post("https://auth.truelayer.com/connect/token", {
-        formData: {
-            grant_type: "authorization_code",
-            client_id: "test-eb3e42",
-            client_secret: TL_SECRET,
-            redirect_uri: "http://localhost:3000/callback/callback.html",
-            code: code
-        },
-        resolveWithFullResponse: false,
-        json: true
-    });
-
-    let access_token = response.access_token;
-    let refresh_token = response.refresh_token;
-
-    const requestMe: any = await axios.get("https://api.truelayer.com/data/v1/me", {
-        headers: {
-            Authorization: `Bearer ${access_token}`
-        }
-        // resolveWithFullResponse: false,
-        // json: true
-    });
-    
-    const metadata: IMe = requestMe.results[0];
-    let credentials_id = metadata.credentials_id;
-    let consent_status = metadata.consent_status;
-    let consent_status_updated_at = metadata.consent_status_updated_at;
-    let consent_expires_at = metadata.consent_expires_at;
-    let display_name = metadata.provider.display_name;
-    let result: QueryResult;
-
-    const selectQuery = {
-        text: "SELECT FROM tokens WHERE credentials_id = $1",
-        values: [credentials_id]
-    };
-
-    try {
-        result = await client.query(selectQuery);
-    } catch (e) {
-        console.log(e);
-        return res.send({ success: false,  
-            access_token: access_token, 
-            refresh_token: refresh_token,
-            credentials_id: credentials_id,
-            consent_status: consent_status,
-            consent_status_updated_at: consent_status_updated_at,
-            consent_expires_at: consent_expires_at });
+    const cookie = req.headers["cookie"];
+    if(!cookie){ 
+        console.log("error");
+        return res.send({ message: "Internal Server Error"}); 
     }
-
-    if (result.rowCount > 0) {
-        let deleteParams = {
-            text: "DELETE FROM tokens WHERE credentials_id = $1",
-            values: [credentials_id]
-        };
-        result = await client.query(deleteParams);
-    }
+    const splitCookie = cookie.split("SESSION_ID="); 
+    const sessionId = splitCookie[1];
+    const userId = await redis.getAsync(sessionId);
 
     const insertQuery = {
-        text: "INSERT INTO tokens(access_token, refresh_token, credentials_id) VALUES($1, $2, $3)",
-        values: [access_token, refresh_token, credentials_id]
-    };
-    try {
-        result = await client.query(insertQuery);
-    } catch (e) {
+        text: "INSERT INTO user_cred_id(id, credentials_id) VALUES($1, $2)",
+        values: [userId, credentials_id]
+    }
+    try{
+        await pgClient.query(insertQuery); 
+    } catch(e){
         console.log(e);
     }
 
-    return res.send({ 
-        success: true, 
-        access_token: access_token, 
-        refresh_token: refresh_token,
-        credentials_id: credentials_id,
-        consent_status: consent_status,
-        consent_status_updated_at: consent_status_updated_at,
-        consent_expires_at: consent_expires_at,
-        display_name: display_name });
-
-
+    res.redirect('/main/home.html');
 });
 
 export { router };

@@ -2,8 +2,8 @@
   <form>
     <label for="email">E-mail:</label><br />
     <input type="email" placeholder="E-mail" v-model="email"><br/>
-    <label for="password2">Password:</label><br/>
-    <input type="email" placeholder="Password" v-model="password"><br/>
+    <label for="password">Password:</label><br/>
+    <input type="password" placeholder="Password" v-model="password"><br/>
     <button type="submit" @click.prevent="register" >Submit</button>
   </form>
 </template>
@@ -45,6 +45,7 @@ export default class Login extends LoginProps {
     }).then((body) => {
         const { message } = body;
         alert(message);
+        window.location.href = "/main/home.html";
     });
   }
 }

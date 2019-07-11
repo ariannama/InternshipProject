@@ -6,4 +6,9 @@ export interface IMe{
     provider: {
         display_name: string
     }
-}
+};
+
+export interface IMeResponse{
+    results: IMe[],
+    status: string
+};

@@ -5,10 +5,11 @@ import * as redis from "redis";
 import { conString } from "./constants";
 import { router } from "./routes/router";
 
+
 var app = express();
-var client = new Client(conString);
+var pgClient = new Client(conString);
 var redisClient = redis.createClient();
-export { redisClient };
+export { redisClient, pgClient };
 
 redisClient.on('connect', function() {
     console.log('Redis client connected');
@@ -25,7 +26,7 @@ app.use(router);
 
 (async () => {
     try {
-        await client.connect();
+        await pgClient.connect();
         console.log("You've successfully connected to your postgres database");
     } catch (e) {
         console.error(e);

@@ -1,113 +1,64 @@
-import { hash, compare } from "bcrypt";
 import * as express from "express";
-import { Client, QueryResult } from "pg";
-import { conString } from "../constants";
-import { redisClient } from "../server";
-// import { redisClient } from "../server";
+import { QueryResult } from "pg";
+import { pgClient } from "../server";
+import Authentication from "../services/authentication"
+import TrueLayer from "../services/truelayer";
+import redis from "../services/redis";
 
-var client = new Client(conString);
-client.connect();
 var router = express.Router();
-
-async function encrypt(input: string): Promise<string> {
-    return await hash(input, 12);
-}
 
 router.post("/register", async (req, res) => {
     const { email, password, password2 } =  req.body;
+    const validationResult = await Authentication.registerCheck(email, password, password2);
+    const dbCheck = await Authentication.registerDBCheck(email);
+    const register = await Authentication.register(email, password);
+
+    if(!validationResult.success){
+        return res.send(validationResult);
+    }
+    if(!dbCheck.success){
+        return res.send(dbCheck);
+    }
+    if(!register.success){
+        return res.send(register)
+    }
+    
     let error: string;
-    let email_format = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    let password_format = /\w*[A-Z]\w*/;
-
-    if (!email || !password){
-        error = "Please fill out all fields and try again";
-        console.log(error);
-        return res.send({ success: false, message: error });
-    }
-    if(!email.match(email_format)){
-        error = "Please enter a valid e-mail address";
-        return res.send({ success: false, message: error});
-    }
-    if (password != password2){
-        error = "Passwords do not match! Please, try again."
-        return res.send({ success: false, message: error });
-    }
-    if (password.length < 8){
-        error = "Password must be at least 8 characters! Please, try again."
-        console.log(error);
-        return res.send({ success: false, message: error });
-    }
-    if (!password.match(password_format)){
-        error = "Passwords must have at least 1 capital letter! Please, try again."
-        console.log(error);
-        return res.send({ success: false, message: error });
-    }
-
-    const selectQuery = {
-        text: "SELECT FROM users WHERE email = $1",
-        values: [email]
-    };
-
-    let result: QueryResult;
-
-    try {
-        result = await client.query(selectQuery);
-    } catch(e) {
-        error = "ERROR: failed to register - Please, try again 3";
-        console.log(e);
-        return res.send({ success: false, message: error});
-    }
-
-    if (result.rowCount > 0){
-        error = "There is an existing account with that e-mail. Please, try again."
-        return res.send({ success: false, message: error});
-    } 
-    
-    let encrypted: string;
-    
-    try {
-        encrypted = await encrypt(password);
-    } catch(e) {
-        console.log(e);
-        return res.send({ success: false, message: "bad"});
-    }
-
-    const insertQuery = {
-        text: "INSERT INTO users(email, password) VALUES($1, $2)",
-        values: [email, encrypted]
-    };
-
-    try {
-        await client.query(insertQuery);
-    } catch(e) {
-        console.log(e);
-        error = "ERROR: failed to register - Please, try again 4";
-        res.send({ success: false, message: error});
-    }
 
     const idQuery = {
         text: "SELECT id FROM users WHERE email = $1",
         values: [email]
     }
 
-    let idResult: QueryResult;
-    let id: string | undefined;
+    let result: QueryResult;
 
     try {
-        idResult = await client.query(idQuery);
-        id = idResult.rows[0].id;
-    } catch(e) {
+        result = await pgClient.query(idQuery);
+    } catch (e) {
         console.log(e);
-        error = "ERROR: failed to register - Please, try again 5";
-        res.send({ success: false, message: error});
+        error = "ERROR: failed to register - Please, try again 4";
+        return res.send({ success: false, message: error});
     }
 
-    res.send({ success: true, message: "You have succesfully created an account!", id: id });
+    const userId = result.rows[0].id;
+    const sessionId = await redis.storeCookie(userId);
+    await res.cookie("SESSION_ID", sessionId);
+
+    return res.send({ success: true, message: "You have successfuly created an account!"});
 });
 
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
+    const fillFieldsCheck = await Authentication.loginCheck(email, password);
+    const dbCheck = await Authentication.loginDBCheck(email, password);
     let error: string;
+    
+    if(!fillFieldsCheck.success){
+        return res.send(fillFieldsCheck);
+    }
+    if(!dbCheck.success){
+        return res.send(dbCheck);
+    }
 
     const emailQuery = {
         text: "SELECT * FROM users WHERE email = $1",
@@ -117,39 +68,33 @@ router.post("/login", async (req, res) => {
     let result: QueryResult;
 
     try {
-        result = await client.query(emailQuery);
+        result = await pgClient.query(emailQuery);
     } catch(e) {
-        error = "ERROR: failed to log in - Please, try again 1";
+        error = "ERROR: failed to log in - Please, try again";
         console.log(e);
-        return res.send({ success: false, message: error});
-    }
-
-    if (result.rowCount === 0){
-        error = "There is no account associated to that e-mail - have you created an account?"
-        return res.send({ success: false, message: error});
-    } 
-
-    const comparison = await compare(password, result.rows[0].password)
-    if (!comparison) {
-        error = "Password mismatch"
-        return res.send({ success: false, message: error });
+        return { success: false, message: error};
     }
     
-    const sessionId = "random-string";
-    redisClient.set(sessionId, result.rows[0].id);
-    res.cookie("SESSION_ID", sessionId);
+    const userId = result.rows[0].id;
+    const sessionId = await redis.storeCookie(userId);
+    await res.cookie("SESSION_ID", sessionId);
+
+    const refreshQuery = {
+        text: "SELECT refresh_token FROM tokens, users, user_cred_id WHERE users.id = $1  AND users.id = user_cred_id.id AND user_cred_id.credentials_id = tokens.credentials_id",
+        values: [userId]
+    }
+    try {
+        result = await pgClient.query(refreshQuery);
+    } catch (e){
+        console.log(e);
+    }
+
+    const refresh_token = result.rows[0].refresh_token;
+    console.log(refresh_token);
+
+    TrueLayer.refreshToken(refresh_token);
+
     return res.send({ success: true, message: "You have successfuly logged in!"});
 });
+
 export { router };
-
-
-// router.get("/protected", async (req, res) => {
-//     const sessionId = req.headers["SESSION_ID"] as string;
-//     const userId = redisClient.get(sessionId);
-
-//     if (!userId) {
-//         return;
-//     }
-
-//     // do your /proteected function
-// })

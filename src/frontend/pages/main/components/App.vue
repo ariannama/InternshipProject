@@ -39,7 +39,15 @@ export default class Callback extends CallbackProps {
             code
         })
     }).then((response) => {
-        window.close();
+      console.log(response);
+        return response.json();
+    }).then((body) => {
+        console.log(body);
+        console.log(response);
+        const { success, access_token, refresh_token, credentials_id, consent_status, consent_status_updated_at, consent_expires_at, display_name} = body;
+        this.token = access_token;
+        this.cred = credentials_id;
+        this.prov = display_name;
     });
   }
 }
