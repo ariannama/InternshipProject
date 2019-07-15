@@ -3,7 +3,8 @@ import { stringify } from "querystring";
 import { TL_SECRET, client_id } from "../constants";
 import { IToken } from "../../interfaces/IToken";
 import { IMe, IMeResponse } from "../../interfaces/IMe";
-import { pgClient } from "../server";
+import { Token } from "../entity/Token";
+import { User } from "../entity/User";
 
 export default class Truelayer {  
     
@@ -31,7 +32,7 @@ export default class Truelayer {
         return { access_token, refresh_token }
     }
 
-    static async getCredentials(access_token: string){
+    static async meEndpoint(access_token: string){
         let config: AxiosRequestConfig = {
             url: "https://api.truelayer.com/data/v1/me",
             method: "GET",
@@ -43,18 +44,27 @@ export default class Truelayer {
         const responseMe: AxiosResponse<IMeResponse> = await axios(config);
         
         const metadata: IMe = responseMe.data.results[0];
-        let credentials_id = metadata.credentials_id;
+        const info = {
+            credentials_id: metadata.credentials_id,
+            consent_status: metadata.consent_status,
+            consent_status_updated_at: metadata.consent_status_updated_at,
+            consent_expires_at: metadata.consent_expires_at,
+            provider: metadata.provider.display_name
+        }
+
         
-        return credentials_id;
+        return info;
     }
 
-    static async insertToken(access_token: string, refresh_token: string, credentials_id: string){
-        const insertQuery = {
-            text: "INSERT INTO tokens(access_token, refresh_token, credentials_id) VALUES ($1, $2, $3)",
-            values: [access_token, refresh_token, credentials_id]
-        }
+    static async insertToken(access_token: string, refresh_token: string, credentials_id: string, userId: User){
+        const token = new Token();
+        token.access_token = access_token;
+        token.refresh_token = refresh_token;
+        token.credentials_id = credentials_id;
+        token.user = userId;
+
         try {
-            await pgClient.query(insertQuery);
+            await token.save();
         } catch (e) {
             console.log(e);
         }
@@ -79,12 +89,8 @@ export default class Truelayer {
         let access_token = response.data.access_token;
         let refresh_token = response.data.refresh_token;
 
-        const updateQuery = {
-            text: "UPDATE tokens SET access_token = $1, refresh_token = $2 WHERE refresh_token = $3",
-            values: [access_token, refresh_token, old_refresh_token]
-        }
         try {
-            await pgClient.query(updateQuery);
+            await Token.update({ refresh_token: old_refresh_token }, { access_token, refresh_token })
         } catch (e) {
             console.log(e);
         }

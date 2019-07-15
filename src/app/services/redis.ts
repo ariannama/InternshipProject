@@ -6,7 +6,7 @@ export default class redis{
     static async storeCookie(id: string){
         const sessionId = uuid4();
         let set = promisify(redisClient.set).bind(redisClient);
-        await set(sessionId, id);
+        await set(sessionId, id);   
         return sessionId;
     }
 

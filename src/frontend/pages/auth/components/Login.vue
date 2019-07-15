@@ -1,11 +1,26 @@
 <template>
-  <form>
-    <label for="email">E-mail:</label><br />
-    <input type="email" placeholder="E-mail" v-model="email"><br/>
-    <label for="password">Password:</label><br/>
-    <input type="password" placeholder="Password" v-model="password"><br/>
-    <button type="submit" @click.prevent="register" >Submit</button>
-  </form>
+<div class="flex h-full w-full max-w-xs"> 
+  <form class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div class="flex content-center justify-center">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+          E-mail
+        </label>
+        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="email" placeholder="E-mail" v-model="email">
+      </div>
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
+          Password
+        </label>
+      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" placeholder="Password" v-model="password">
+      </div>
+      <div class="flex items-center justify-between">
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" @click.prevent="register">
+          Sign In
+        </button>
+      </div>  
+    </form>
+  </div>
 </template>
 
 <script lang="ts">

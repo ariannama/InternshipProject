@@ -1,6 +1,5 @@
-import { QueryResult } from "pg";
-import { pgClient } from "../server";
 import { compare, hash } from "bcrypt";
+import { User } from "../entity/User";
 
 export default class Validation{
     
@@ -37,48 +36,32 @@ export default class Validation{
         return response;
     }
 
-    static async registerDBCheck(email: string){
-        let result: QueryResult;
-        let error: string;
-        let response = { success: true, message: "ok" };
-
-        const selectQuery = {
-            text: "SELECT FROM users WHERE email = $1",
-            values: [email]
-        };
+    static async getUser(email: string){
+        let user: User | undefined;
 
         try {
-            result = await pgClient.query(selectQuery);
+            user = await User.findOne({ where: { email }});
         } catch(e) {
-            error = "ERROR: failed to register - Please, try again";
             console.log(e);
-            return response = { success: false, message: error };
+            const error = "ERROR: Internal Server Error";
+            throw new Error(error); 
         }
 
-        if (result.rowCount > 0){
-            error = "There is an existing account with that e-mail. Please, use another e-mail or log in to your existing account."
-            return response = { success: false, message: error};
-        }
-        
-        return response;
+        return user;
     }
 
     static async register(email: string, password: string){
-        let encrypted: string;
-        let error: string;
         let response = { success: true, message: "ok"};
-        encrypted = await hash(password, 12);
-
-        const insertQuery = {
-            text: "INSERT INTO users(email, password) VALUES($1, $2)",
-            values: [email, encrypted]
-        };
+        const encrypted = await hash(password, 12);
+        const user = new User();
+        user.email = email;
+        user.password = encrypted;
 
         try {
-            await pgClient.query(insertQuery);
+            await user.save();
         } catch(e) {
             console.log(e);
-            error = "ERROR: failed to register - Please, try again 4";
+            const error = "ERROR: failed to register - Please, try again";
             return response = ({ success: false, message: error});
         }
 
@@ -98,31 +81,12 @@ export default class Validation{
         return response;
     }
 
-    static async loginDBCheck(email: string, password: string){
+    static async passwordCheck(inputPassword: string, password: string){
         let error: string;
         let response = { success: true, message: "ok"};
+        const encrypted = await hash(inputPassword, 12);
 
-        const emailQuery = {
-            text: "SELECT * FROM users WHERE email = $1",
-            values: [email]
-        };
-    
-        let result: QueryResult;
-    
-        try {
-            result = await pgClient.query(emailQuery);
-        } catch(e) {
-            error = "ERROR: failed to log in - Please, try again 1";
-            console.log(e);
-            return { success: false, message: error};
-        }
-    
-        if (result.rowCount === 0){
-            error = "There is no account associated to that e-mail - have you created an account?"
-            return { success: false, message: error};
-        }
-
-        const comparison = await compare(password, result.rows[0].password)
+        const comparison = await compare(encrypted, password);
 
         if (!comparison) {
             error = "Wrong password - please, try again"

@@ -1,47 +1,45 @@
 import * as express from "express";
-import { QueryResult } from "pg";
-import { pgClient } from "../server";
 import Authentication from "../services/authentication"
 import TrueLayer from "../services/truelayer";
 import redis from "../services/redis";
+import { User } from "../entity/User";
+import { Token } from "../entity/Token";
 
 var router = express.Router();
 
 router.post("/register", async (req, res) => {
     const { email, password, password2 } =  req.body;
     const validationResult = await Authentication.registerCheck(email, password, password2);
-    const dbCheck = await Authentication.registerDBCheck(email);
-    const register = await Authentication.register(email, password);
+    const check = await Authentication.getUser(email);
+    const error = "ERROR: failed to register - Please, try again";
 
     if(!validationResult.success){
         return res.send(validationResult);
     }
-    if(!dbCheck.success){
-        return res.send(dbCheck);
+    if(check){
+        return res.send({success: false, message: "There is an existing account with that email - Please, try again"});
     }
+
+    const register = await Authentication.register(email, password);
+
     if(!register.success){
         return res.send(register)
     }
     
-    let error: string;
-
-    const idQuery = {
-        text: "SELECT id FROM users WHERE email = $1",
-        values: [email]
-    }
-
-    let result: QueryResult;
+    let user: User | undefined;
 
     try {
-        result = await pgClient.query(idQuery);
+        user =await User.findOne({ where: { email }});
     } catch (e) {
         console.log(e);
-        error = "ERROR: failed to register - Please, try again 4";
+        return res.send({ success: false, message: error});
+    }
+    if(!user){
         return res.send({ success: false, message: error});
     }
 
-    const userId = result.rows[0].id;
-    const sessionId = await redis.storeCookie(userId);
+    const userId = user.id;
+    const sessionId = await redis.storeCookie(userId.toString());
     await res.cookie("SESSION_ID", sessionId);
 
     return res.send({ success: true, message: "You have successfuly created an account!"});
@@ -50,47 +48,37 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     const fillFieldsCheck = await Authentication.loginCheck(email, password);
-    const dbCheck = await Authentication.loginDBCheck(email, password);
-    let error: string;
-    
+    const user = await Authentication.getUser(email);
+
     if(!fillFieldsCheck.success){
         return res.send(fillFieldsCheck);
     }
-    if(!dbCheck.success){
-        return res.send(dbCheck);
+    if(!user){
+        return res.send({ success: false, message: "There is no account registered with that e-mail - Please, try again"});
     }
 
-    const emailQuery = {
-        text: "SELECT * FROM users WHERE email = $1",
-        values: [email]
-    };
+    const passwordCheck = await Authentication.passwordCheck(password, user.password);
 
-    let result: QueryResult;
-
-    try {
-        result = await pgClient.query(emailQuery);
-    } catch(e) {
-        error = "ERROR: failed to log in - Please, try again";
-        console.log(e);
-        return { success: false, message: error};
+    if(!passwordCheck.success){
+        return res.send(passwordCheck);
     }
-    
-    const userId = result.rows[0].id;
-    const sessionId = await redis.storeCookie(userId);
+
+    const userId = user.id;
+    const sessionId = await redis.storeCookie(userId.toString());
     await res.cookie("SESSION_ID", sessionId);
+    let token: Token | undefined;
 
-    const refreshQuery = {
-        text: "SELECT refresh_token FROM tokens, users, user_cred_id WHERE users.id = $1  AND users.id = user_cred_id.id AND user_cred_id.credentials_id = tokens.credentials_id",
-        values: [userId]
-    }
     try {
-        result = await pgClient.query(refreshQuery);
+        token = await Token.findOne(user);
     } catch (e){
         console.log(e);
+        return res.send({ success: false, message: "ERROR: Failed to login - Please, try again"});
     }
-
-    const refresh_token = result.rows[0].refresh_token;
-    console.log(refresh_token);
+    if(!token){
+        return res.send({ success: false, message: "ERROR: Failed to login - Please, try again"});
+    }
+    
+    const refresh_token = token.refresh_token;
 
     TrueLayer.refreshToken(refresh_token);
 

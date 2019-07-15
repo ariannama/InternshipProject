@@ -29,7 +29,7 @@ export default class Callback extends CallbackProps {
   mounted() {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get("code");
-    fetch("http://localhost:3000/callback/callback", {
+    fetch("http://localhost:3000/home", {
         method: 'POST',
         mode: 'cors',
         headers: {

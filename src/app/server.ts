@@ -1,15 +1,14 @@
+import * as dotenv from "dotenv";
 import * as cors from "cors";
 import * as express from "express";
-import { Client } from "pg";
 import * as redis from "redis";
-import { conString } from "./constants";
 import { router } from "./routes/router";
+import { DB } from "./database/db";
 
-
-var app = express();
-var pgClient = new Client(conString);
-var redisClient = redis.createClient();
-export { redisClient, pgClient };
+dotenv.config();
+const app = express();
+const redisClient = redis.createClient();
+export { redisClient };
 
 redisClient.on('connect', function() {
     console.log('Redis client connected');
@@ -26,7 +25,7 @@ app.use(router);
 
 (async () => {
     try {
-        await pgClient.connect();
+        await DB.initialize(); 
         console.log("You've successfully connected to your postgres database");
     } catch (e) {
         console.error(e);

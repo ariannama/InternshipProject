@@ -9,7 +9,9 @@
       "strict": true,
       "pretty": true,
       "noUnusedLocals": true,
-      "noUnusedParameters": true
+      "noUnusedParameters": true,
+      "emitDecoratorMetadata": true,
+      "experimentalDecorators": true
   },
   "include": [
       "src", "assets", "sfc.d.ts"
