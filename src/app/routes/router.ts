@@ -7,7 +7,7 @@ var router = express.Router();
 
 router.use('/callback', ConsentRouter);
 router.use('/auth', AuthRouter);
-router.use('/', HomeRouter);
+router.use('/home', HomeRouter);
 
 export { router };
 

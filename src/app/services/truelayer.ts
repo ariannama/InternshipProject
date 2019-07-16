@@ -32,37 +32,35 @@ export default class Truelayer {
         return { access_token, refresh_token }
     }
 
-    static async meEndpoint(access_token: string){
+    static async meEndpoint(access_token: string): Promise<IMe | undefined>{
         let config: AxiosRequestConfig = {
             url: "https://api.truelayer.com/data/v1/me",
             method: "GET",
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
                 Authorization: `Bearer ${access_token}`
             },
         } 
-        const responseMe: AxiosResponse<IMeResponse> = await axios(config);
-        
-        const metadata: IMe = responseMe.data.results[0];
-        const info = {
-            credentials_id: metadata.credentials_id,
-            consent_status: metadata.consent_status,
-            consent_status_updated_at: metadata.consent_status_updated_at,
-            consent_expires_at: metadata.consent_expires_at,
-            provider: metadata.provider.display_name
+
+        let responseMe: AxiosResponse<IMeResponse>;
+
+        try{
+            responseMe = await axios(config);
+        } catch(e){
+            return undefined;
         }
 
-        
-        return info;
+        const metadata: IMe = responseMe.data.results[0];
+
+        return metadata;
     }
 
-    static async insertToken(access_token: string, refresh_token: string, credentials_id: string, userId: User){
+    static async insertToken(access_token: string, refresh_token: string, credentials_id: string, user: User){
         const token = new Token();
         token.access_token = access_token;
         token.refresh_token = refresh_token;
         token.credentials_id = credentials_id;
-        token.user = userId;
-
+        token.user = user;
+        
         try {
             await token.save();
         } catch (e) {

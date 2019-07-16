@@ -1,5 +1,13 @@
-import Vue from 'vue';
-import Container from "./components/Callback.vue";
-import '../../../../assets/tailwind.css';
+const urlParams = new URLSearchParams(window.location.search);
+const code = urlParams.get("code");
 
-new Vue(Container).$mount("#app");
+fetch("http://localhost:3000/callback/callback", {
+    method: 'POST',
+    mode: 'cors',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        code
+    })
+});
