@@ -1,4 +1,4 @@
-import * as uuid4 from "uuidv4";
+import uuid4 from "uuidv4";
 import { redisClient } from "../server";
 import { promisify } from "util";
 

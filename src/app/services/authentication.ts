@@ -84,9 +84,8 @@ export default class Validation{
     static async passwordCheck(inputPassword: string, password: string){
         let error: string;
         let response = { success: true, message: "ok"};
-        const encrypted = await hash(inputPassword, 12);
 
-        const comparison = await compare(encrypted, password);
+        const comparison = await compare(inputPassword, password);
 
         if (!comparison) {
             error = "Wrong password - please, try again"

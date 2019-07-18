@@ -2,6 +2,7 @@
     <div>
         <h1>Here is the information about your access token:</h1>
         <div>{{cred}}</div>
+        
     </div>
 </template>
 
@@ -31,6 +32,7 @@ export default class Home extends Vue {
         } catch (e) {
             return (this.cred = "Failed to fetch");
         }
+
 
         this.cred = response.data.credentials_id;
     }

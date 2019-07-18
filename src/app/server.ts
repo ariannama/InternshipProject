@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
-import * as cors from "cors";
-import * as express from "express";
+import cors from "cors";
+import express from "express";
 import * as redis from "redis";
 import { router } from "./routes/router";
 import { DB } from "./database/db";

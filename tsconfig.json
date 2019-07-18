@@ -1,19 +1,24 @@
 {
-  "compileOnSave": true,
-  "compilerOptions": {
-      "target": "es5",
-      "module": "commonjs",
-      "outDir": "dist",
-      "rootDir": "src",
-      "sourceMap": true,
-      "strict": true,
-      "pretty": true,
-      "noUnusedLocals": true,
-      "noUnusedParameters": true,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true
-  },
-  "include": [
-      "src", "assets", "sfc.d.ts"
-  ]
+    "compileOnSave": true,
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "outDir": "dist",
+        "rootDir": "src",
+        "sourceMap": true,
+        "strict": true,
+        "pretty": true,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "lib": [
+          "esnext", 
+          "dom", 
+          "dom.iterable", 
+          "scripthost"
+        ]
+    },
+    "include": ["src", "assets", "sfc.d.ts"]
 }
