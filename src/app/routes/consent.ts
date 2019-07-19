@@ -9,32 +9,30 @@ router.get("/callback", async (req, res) => {
     const code = req.query.code;
     const { access_token, refresh_token } = await TrueLayer.exchangeCode(code);
     const meResult = await TrueLayer.meEndpoint(access_token);
-    
-    if(!meResult){ 
-        return res.send({ message: "Request to me endpoint failed"});
+
+    if (!meResult) {
+        return res.send({ message: "Request to me endpoint failed" });
     }
 
     const credentials_id = meResult.credentials_id;
 
     const cookie = req.headers["cookie"];
-    if(!cookie){ 
+    if (!cookie) {
         console.log("error");
-        return res.send({ message: "Internal Server Error"}); 
+        return res.send({ message: "Internal Server Error" });
     }
-    const splitCookie = cookie.split("SESSION_ID="); 
+    const splitCookie = cookie.split("SESSION_ID=");
     const sessionId = splitCookie[1];
     const userId = await redis.getAsync(sessionId);
-    const user = await User.findOne({ where: { id: userId }});
-    
-    if(!user){
+    const user = await User.findOne({ where: { id: userId } });
+
+    if (!user) {
         return res.send("error");
     }
 
     await TrueLayer.insertToken(access_token, refresh_token, credentials_id, user);
-    
 
-    res.redirect('/home/home.html');
+    res.redirect("/main/home.html");
 });
 
 export { router };
-

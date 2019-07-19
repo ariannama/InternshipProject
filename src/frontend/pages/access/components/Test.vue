@@ -24,7 +24,7 @@
                 />
                 <label for="password">Password</label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit" @click.prevent="register">Sign in</button>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         </form>
     </div>
 </template>

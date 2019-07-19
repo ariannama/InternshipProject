@@ -3,7 +3,7 @@ import App from "./Auth.vue";
 import Login from "./components/Login.vue";
 import Register from "./components/Register.vue";
 import VueRouter from "vue-router";
-import "../../../../assets/tailwind.css";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 Vue.config.devtools = true;
 Vue.config.productionTip = true;
