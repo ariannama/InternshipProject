@@ -1,37 +1,26 @@
 import * as dotenv from "dotenv";
 import cors from "cors";
 import express from "express";
-import * as redis from "redis";
-import { router } from "./routes/router";
+import redis from "./services/redis";
 import { DB } from "./database/db";
+import { router } from "./routes/router";
 
 dotenv.config();
 const app = express();
-const redisClient = redis.createClient();
-export { redisClient };
-
-redisClient.on('connect', function() {
-    console.log('Redis client connected');
-});
-
-redisClient.on('error', function (err) {
-    console.log('Something went wrong ' + err);
-});
+const redisConn = redis.initialize();
+export { redisConn };
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static("public"));
 app.use(router);
 
 (async () => {
     try {
-        await DB.initialize(); 
-        console.log("You've successfully connected to your postgres database");
+        await DB.initialize();
     } catch (e) {
         console.error(e);
-        console.log("ERROR");
     }
-
 
     app.listen(3000, () => console.log("running"));
 })();

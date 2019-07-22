@@ -1,9 +1,9 @@
 import * as express from "express";
-import Authentication from "../services/authentication"
-import TrueLayer from "../services/truelayer";
+import Authentication from "../services/authentication";
 import redis from "../services/redis";
-import { User } from "../entity/User";
+import TrueLayer from "../services/truelayer";
 import { Token } from "../entity/Token";
+import { User } from "../entity/User";
 
 var router = express.Router();
 
@@ -29,7 +29,7 @@ router.post("/register", async (req, res) => {
     let user: User | undefined;
 
     try {
-        user =await User.findOne({ where: { email }});
+        user = await User.findOne({ where: { email }});
     } catch (e) {
         console.log(e);
         return res.send({ success: false, message: error});
@@ -40,8 +40,7 @@ router.post("/register", async (req, res) => {
 
     const userId = user.id;
     const sessionId = await redis.storeCookie(userId.toString());
-    await res.cookie("SESSION_ID", sessionId);
-
+    res.cookie("SESSION_ID", sessionId);
     return res.send({ success: true, message: "You have successfuly created an account!"});
 });
 
@@ -65,7 +64,7 @@ router.post("/login", async (req, res) => {
 
     const userId = user.id;
     const sessionId = await redis.storeCookie(userId.toString());
-    await res.cookie("SESSION_ID", sessionId);
+    res.cookie("SESSION_ID", sessionId);
     let token: Token | undefined;
 
     try {
@@ -83,6 +82,18 @@ router.post("/login", async (req, res) => {
     TrueLayer.refreshToken(refresh_token);
 
     return res.send({ success: true, message: "You have successfuly logged in!"});
+});
+
+router.get("/logout", async(req, res) => {
+    const cookie = req.headers["cookie"];
+    if(!cookie){
+        return res.send({ success: false })
+    }
+    const splitCookie = cookie.split("SESSION_ID="); 
+    const sessionId = splitCookie[1];
+    await redis.delete(sessionId);
+    res.clearCookie("SESSION_ID");
+    return res.send();
 });
 
 export { router };

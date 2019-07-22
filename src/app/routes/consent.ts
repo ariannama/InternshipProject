@@ -23,7 +23,7 @@ router.get("/callback", async (req, res) => {
     }
     const splitCookie = cookie.split("SESSION_ID=");
     const sessionId = splitCookie[1];
-    const userId = await redis.getAsync(sessionId);
+    const userId = await redis.get(sessionId);
     const user = await User.findOne({ where: { id: userId } });
 
     if (!user) {

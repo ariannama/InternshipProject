@@ -93,4 +93,30 @@ export default class Truelayer {
             console.log(e);
         }
     }
+
+    static async validateToken(access_token: string){
+        let config: AxiosRequestConfig = {
+            url: "https://api.truelayer.com/data/v1/me",
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${access_token}`
+            },
+        } 
+
+        let responseAcc: AxiosResponse;
+
+        try{
+            responseAcc = await axios(config);
+        } catch(e){
+            return false;
+        }
+
+        const status = responseAcc.status;
+
+        if(status === 200){
+            return true;
+        } else { 
+            return false; 
+        }
+    }
 }
