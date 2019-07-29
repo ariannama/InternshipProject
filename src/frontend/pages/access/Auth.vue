@@ -1,32 +1,46 @@
 <template>
-    <div class="head">
-        <ul class="list-inline">
-            <li class="list-inline-item">
-                <router-link to="/register">Create an account</router-link>
-            </li>
-            <li class="list-inline-item">
-                <router-link to="/login">Log into your account</router-link>
-            </li>
-        </ul>
+    <div id="app">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm">
+                    <router-link class="router-link" to="/register">Create an account</router-link>
+                </div>
+                <div class="col-sm">
+                    <router-link class="router-link" to="/login">Log into your account</router-link>
+                </div>
+            </div>
+        </div>
         <router-view />
     </div>
 </template>
 
 <style>
-.head {
-    background-color: #f5f5f5;
-}
-.list-inline{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.list-inline-item {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+@import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
+body {
+    background-image: linear-gradient(135deg, #093554, #058ed8, #fef0d6);
+}
+.container {
+    height: 20vh;
+    padding-top: 30px;
+    margin-top: 30px;
+}
+.route {
+    height: 20vh;
+}
+.col-sm {
+    display: flex;
+    justify-content: center;
+}
+.route,
+html {
+    font-family: "Lato", sans-serif;
+    color: lightgray;
+}
+.router-link {
+    color: white;
+    font-family: "Lato", sans-serif;
+}
 </style>
 
 <script lang="ts">

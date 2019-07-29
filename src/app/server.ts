@@ -15,6 +15,11 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(router);
 
+// /* final catch-all route to index.html defined last */
+// app.get("/*", (req, res) => {
+//     res.sendFile(__dirname + "/index.html");
+// });
+
 (async () => {
     try {
         await DB.initialize();

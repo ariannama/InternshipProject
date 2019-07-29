@@ -1,7 +1,11 @@
 <template>
-    <div>
-        <h1>Here is the information about your access token:</h1>
-        <div>
+    <div class="Home">
+        <Navbar></Navbar>
+        <h2>Here is the information about your access token:</h2>
+        <div id="icon">
+            <img id="provider-img" v-bind:src="provider_logo" alt />
+        </div>
+        <div class="token-table">
             <Table
                 v-bind:credentials_id="credentials_id"
                 v-bind:consent_status="consent_status"
@@ -10,23 +14,83 @@
                 v-bind:provider_name="provider_name"
             />
         </div>
-        <div>
-            <img v-bind:src="provider_logo" alt />
+        <div class="button-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                        <button
+                            @click="refresh"
+                            type="button"
+                            class="btn btn-primary btn-lg"
+                        >{{textRefresh}}</button>
+                    </div>
+                    <div class="col-sm">
+                        <button
+                            @click="validate"
+                            type="button"
+                            class="btn btn-primary btn-lg"
+                        >{{textValidate}}</button>
+                    </div>
+                    <div class="col-sm">
+                        <button
+                            @click="renew"
+                            type="button"
+                            class="btn btn-primary btn-lg"
+                        >{{textAdd}}</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button @click="logout" type="submit">{{textLogOut}}</button>
-        <button @click="refresh" type="submit">{{textRefresh}}</button>
-        <button @click="validate" type="submit">{{textValidate}}</button>
-        <button @click="renew" type="submit">{{textAdd}}</button>
     </div>
 </template>
 
 <style>
-img {
-    max-width: 3pc;
-    height: auto;
+@import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
+
+body {
+    margin: 0;
+    background-image: linear-gradient(135deg, #093554, #058ed8, #fef0d6);
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
 }
-body{
-    color: #576d8e;
+h2 {
+    font-family: "Lato", sans-serif;
+    color: white;
+    display: flex;
+    justify-content: center;
+    height: 11vh;
+}
+#provider-img {
+    max-width: 3pc;
+}
+#icon {
+    display: flex;
+    justify-content: center;
+    height: 10vh;
+}
+table {
+    background-color: white;
+}
+.token-table {
+    height: 45vh;
+}
+.button-container {
+    height: 23vh;
+}
+.btn-primary {
+    background-color: #f7ab1b !important;
+    border: none !important;
+    font-family: "Lato", sans-serif;
+}
+.col-sm {
+    display: flex;
+    justify-content: center;
+}
+.swal-text,
+.swal-title,
+.swal-button {
+    font-family: "Lato", sans-serif;
 }
 </style>
 
@@ -36,10 +100,13 @@ import { Vue, Component } from "vue-property-decorator";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { IMe, Provider } from "../../../interfaces/IMe";
 import Table from "./components/Table.vue";
+import Navbar from "./components/Navbar.vue";
+import swal from "sweetalert";
 
 @Component({
     components: {
-        Table: Table
+        Table: Table,
+        Navbar: Navbar
     }
 })
 export default class Home extends Vue {
@@ -52,7 +119,7 @@ export default class Home extends Vue {
     textLogOut = "Log out";
     textRefresh = "Refresh Token";
     textValidate = "Validate Token";
-    textAdd = "Access different token/Renew consent";
+    textAdd = "Add Token";
 
     async mounted() {
         let config: AxiosRequestConfig = {
@@ -71,7 +138,6 @@ export default class Home extends Vue {
             return (this.credentials_id = "Failed to fetch");
         }
         if (response.data.credentials_id === undefined) {
-            alert("Please, log in");
             window.location.replace("http://localhost:3000/access/auth.html");
         }
 
@@ -82,29 +148,6 @@ export default class Home extends Vue {
         const provider: Provider = response.data.provider;
         this.provider_name = provider.display_name;
         this.provider_logo = provider.logo_uri;
-    }
-
-    async logout() {
-        let config: AxiosRequestConfig = {
-            url: "http://localhost:3000/auth/logout",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        };
-
-        let response: AxiosResponse | undefined;
-
-        try {
-            response = await axios(config);
-        } catch (e) {
-            console.log(e);
-            return "ok";
-        }
-        if (!response) {
-            debugger
-        }
-        window.location.replace("http://localhost:3000/access/auth.html"); 
     }
 
     async refresh() {
@@ -122,18 +165,29 @@ export default class Home extends Vue {
             response = await axios(config);
         } catch (e) {
             console.log(e);
-            return alert("Internal Server Error");
+            return swal(
+                "Internal Server Error",
+                "Please, try again later",
+                "error"
+            );
         }
 
-        if(response.data.success){
-            alert("Token refreshed succesfully");
-        } 
-        else{
-            alert("Something went wrong");
+        if (response.data.success) {
+            swal(
+                "Done!",
+                "Your access token has been successfully refreshed",
+                "success"
+            );
+        } else {
+            swal(
+                "Something went wrong",
+                "We could not refresh your token - please, try again later",
+                "error"
+            );
         }
     }
 
-    async validate(){
+    async validate() {
         let config: AxiosRequestConfig = {
             url: "http://localhost:3000/home/validate",
             method: "GET",
@@ -148,19 +202,28 @@ export default class Home extends Vue {
             response = await axios(config);
         } catch (e) {
             console.log(e);
-            return alert("Internal Server Error");
+            return swal(
+                "Internal Server Error",
+                "Please, try again later",
+                "error"
+            );
         }
 
-        if(response.data.success){
-            alert("Your token is valid");
-        } 
-        else{
-            alert("Invalid Token");
+        if (response.data.success === true) {
+            swal("Done!", "Your token is valid", "success");
+        } else {
+            swal(
+                "Something went wrong",
+                "Your token seems to not be valid - please, try entering a new token",
+                "error"
+            );
         }
     }
 
-    async renew(){
-        window.location.assign("https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false")
+    async renew() {
+        window.location.assign(
+            "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false"
+        );
     }
 }
 </script>

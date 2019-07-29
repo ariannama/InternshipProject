@@ -24,7 +24,7 @@ router.get("/home", async (req, res) => {
     }
 
     let token: Token | undefined;
-// FUCK YOU JS
+
     try {
         token = await Token.findOne({ user: { id: userId }});
     } catch (e) {

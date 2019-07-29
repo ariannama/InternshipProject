@@ -1,5 +1,5 @@
 <template>
-    <div class="body">
+    <div class="route">
         <form class="form-signin">
             <div class="form-label-group">
                 <input
@@ -35,12 +35,22 @@
                 />
                 <label for="password">Confirm your password:</label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit" @click.prevent="register">Register</button>
+            <button
+                class="btn btn-lg btn-primary btn-block"
+                type="submit"
+                @click.prevent="register"
+            >Register</button>
         </form>
     </div>
 </template>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
+
+button,
+.btn {
+    font-family: "Lato", sans-serif;
+}
 html,
 .bd-placeholder-img {
     font-size: 1.125rem;
@@ -64,7 +74,6 @@ html,
     align-items: center;
     padding-top: 40px;
     padding-bottom: 40px;
-    background-color: #f5f5f5;
 }
 
 .form-signin {
@@ -72,6 +81,10 @@ html,
     max-width: 420px;
     padding: 15px;
     margin: auto;
+    margin-top: 100px;
+    border: 40px solid transparent;
+    background: white;
+    border-radius: 0.25rem;
 }
 
 .form-label-group {
@@ -132,12 +145,16 @@ html,
     font-size: 12px;
     color: #777;
 }
+.swal-text {
+    font-family: "Lato", sans-serif;
+}
 </style>
 
 
 <script lang="ts">
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { Vue, Component } from "vue-property-decorator";
+import swal from "sweetalert";
 
 @Component
 export default class Register extends Vue {
@@ -168,10 +185,19 @@ export default class Register extends Vue {
         }
 
         if (!response.data.success) {
-            alert(response.data.message);
+            swal({
+                text: response.data.message,
+                icon: "error" 
+                });
         } else {
-            alert(response.data.message);
-            window.location.href = "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false";
+            await swal({
+                text: response.data.message,
+                icon: "success",
+                buttons: false,
+                timer: 1000 
+                });
+            window.location.href =
+                "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false";
         }
     }
 }

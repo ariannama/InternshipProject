@@ -14,6 +14,10 @@ const router = new VueRouter({
     mode: "history",
     routes: [
         {
+            path: "/access/auth.html",
+            redirect: "/login"
+        },
+        {
             path: "/register",
             component: Register
         },
