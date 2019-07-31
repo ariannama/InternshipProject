@@ -1,46 +1,64 @@
 <template>
     <div class="route">
-        <form class="form-signin">
-            <div class="form-label-group">
-                <input
-                    type="email"
-                    id="inputEmail"
-                    class="form-control"
-                    placeholder="Email address"
-                    required
-                    autofocus
-                    v-model="email"
-                />
-                <label for="email">Enter your e-mail address:</label>
+        <div class="container">
+            <div class="col-lg-5" id="register">
+                <div class="icon">
+                    <img
+                        id="token-img"
+                        src="../../../../../token.svg"
+                        width="30"
+                        height="30"
+                        class="d-inline-block align-top"
+                        alt
+                    />
+                </div>
+                <form class="form-signin">
+                    <div class="form-label-group">
+                        <input
+                            type="email"
+                            id="inputEmail"
+                            class="form-control"
+                            placeholder="Email address"
+                            required
+                            autofocus
+                            v-model="email"
+                        />
+                        <label for="email">Enter your e-mail address:</label>
+                    </div>
+                    <div class="form-label-group">
+                        <input
+                            type="password"
+                            id="inputPassword"
+                            class="form-control"
+                            placeholder="Password"
+                            required
+                            v-model="password"
+                        />
+                        <label for="password">Enter your password (at least 6 characters):</label>
+                    </div>
+                    <div class="form-label-group">
+                        <input
+                            type="password"
+                            id="inputPassword"
+                            class="form-control"
+                            placeholder="Password"
+                            required
+                            v-model="password2"
+                        />
+                        <label for="password">Confirm your password:</label>
+                    </div>
+                    <button
+                        class="btn btn-lg btn-primary btn-block"
+                        type="submit"
+                        @click.prevent="register"
+                    >Register</button>
+                    <p>
+                        Already have an account?
+                        <router-link class="router-link" to="/login">&nbsp;Sign in</router-link>
+                    </p>
+                </form>
             </div>
-            <div class="form-label-group">
-                <input
-                    type="password"
-                    id="inputPassword"
-                    class="form-control"
-                    placeholder="Password"
-                    required
-                    v-model="password"
-                />
-                <label for="password">Enter your password (at least 6 characters):</label>
-            </div>
-            <div class="form-label-group">
-                <input
-                    type="password"
-                    id="inputPassword"
-                    class="form-control"
-                    placeholder="Password"
-                    required
-                    v-model="password2"
-                />
-                <label for="password">Confirm your password:</label>
-            </div>
-            <button
-                class="btn btn-lg btn-primary btn-block"
-                type="submit"
-                @click.prevent="register"
-            >Register</button>
-        </form>
+        </div>
     </div>
 </template>
 
@@ -50,100 +68,29 @@
 button,
 .btn {
     font-family: "Lato", sans-serif;
+    background-color: #44689a !important;
+    border-color: #44689a !important;
 }
-html,
-.bd-placeholder-img {
-    font-size: 1.125rem;
-    text-anchor: middle;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+.col-sm {
+    padding-right: 0;
+    padding-left: 0;
 }
-
-@media (min-width: 768px) {
-    .bd-placeholder-img-lg {
-        font-size: 3.5rem;
-    }
+#register {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    height: 410px !important;
+    border-radius: 0.25rem;
+    background-image: linear-gradient(#44689a 0 15%, white 0 85%);
 }
-
-.body {
-    display: -ms-flexbox;
+.icon {
     display: flex;
-    -ms-flex-align: center;
-    align-items: center;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    justify-content: center;
+    margin-bottom: 25px;
 }
-
-.form-signin {
-    width: 100%;
-    max-width: 420px;
-    padding: 15px;
-    margin: auto;
-    margin-top: 100px;
-    border: 40px solid transparent;
-    background: white;
-    border-radius: 0.25rem;
-}
-
-.form-label-group {
-    position: relative;
-    margin-bottom: 1rem;
-}
-
-.form-label-group > input,
-.form-label-group > label {
-    height: 3.175rem;
-    padding: 0.75rem;
-}
-
-.form-label-group > label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: block;
-    width: 100%;
-    margin-bottom: 0; /* Override default `<label>` margin */
-    line-height: 1.5;
-    color: #495057;
-    pointer-events: none;
-    cursor: text; /* Match the input under the label */
-    border: 1px solid transparent;
-    border-radius: 0.25rem;
-    transition: all 0.1s ease-in-out;
-}
-
-.form-label-group input::-webkit-input-placeholder {
-    color: transparent;
-}
-
-.form-label-group input:-ms-input-placeholder {
-    color: transparent;
-}
-
-.form-label-group input::-ms-input-placeholder {
-    color: transparent;
-}
-
-.form-label-group input::-moz-placeholder {
-    color: transparent;
-}
-
-.form-label-group input::placeholder {
-    color: transparent;
-}
-
-.form-label-group input:not(:placeholder-shown) {
-    padding-top: 1.25rem;
-    padding-bottom: 0.25rem;
-}
-
-.form-label-group input:not(:placeholder-shown) ~ label {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    font-size: 12px;
-    color: #777;
+img {
+    margin-top: 5px;
+    width: 45px;
+    height: 45px;
 }
 .swal-text {
     font-family: "Lato", sans-serif;
@@ -187,15 +134,15 @@ export default class Register extends Vue {
         if (!response.data.success) {
             swal({
                 text: response.data.message,
-                icon: "error" 
-                });
+                icon: "error"
+            });
         } else {
             await swal({
                 text: response.data.message,
                 icon: "success",
-                buttons: false,
-                timer: 1000 
-                });
+                buttons: [false],
+                timer: 1000
+            });
             window.location.href =
                 "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false";
         }

@@ -5,91 +5,64 @@ import { Token } from "../entity/Token";
 
 var router = express.Router();
 
+//Endpoint returns info about access token
 router.get("/home", async (req, res) => {
     const cookie = req.headers["cookie"];
-    if(!cookie){ 
-        console.log("error");
-        return res.send({ success: false, message: "Internal Server Error"}); 
-    }
-    const splitCookie = cookie.split("SESSION_ID="); 
-    const sessionId = splitCookie[1];
-    const userIdString = await redis.get(sessionId);
-    if(!userIdString){
-        return res.send({ success: false });
-    }
-    const userId = parseInt(userIdString);
+    const userId = await redis.extractUserId(cookie);
 
     if (!userId) {
-        return res.send({ success: false});
+        return res.send({ success: false });
     }
 
-    let token: Token | undefined;
+    let tokens: Token | undefined;
 
     try {
-        token = await Token.findOne({ user: { id: userId }});
+        tokens = await Token.findOne({ user: { id: userId } });
     } catch (e) {
         console.log(e);
         return res.send({ success: false });
     }
-    if(!token){
+    if (!tokens) {
         return res.send({ success: false });
     }
-    
-    const access_token = token.access_token;
+
+    const access_token = tokens.access_token;
 
     const me = await TrueLayer.meEndpoint(access_token);
-    
+
     return res.send(me);
 });
 
+//Endpoint refreshes current access token
 router.get("/refresh", async (req, res) => {
-     const cookie = req.headers["cookie"];
-     if (!cookie) {
-         console.log("error");
-         return res.send({ success: false, message: "Internal Server Error" });
-     }
-     const splitCookie = cookie.split("SESSION_ID=");
-     const sessionId = splitCookie[1];
-     const userIdString = await redis.get(sessionId);
-     if (!userIdString) {
-         return res.send({ success: false });
-     }
-     const userId = parseInt(userIdString);
-
-     if (!userId) {
-         return res.send({ success: false });
-     }
-
-     let token: Token | undefined;
-     // FUCK YOU JS
-     try {
-         token = await Token.findOne({ user: { id: userId } });
-     } catch (e) {
-         console.log(e);
-         return res.send({ success: false });
-     }
-     if (!token) {
-         return res.send({ success: false });
-     }
-
-     const refresh_token = token.refresh_token;
-     TrueLayer.refreshToken(refresh_token);
-     return res.send({ success: true}); 
-});
-
-router.get("/validate", async(req,res) => {
     const cookie = req.headers["cookie"];
-    if (!cookie) {
-        console.log("error");
-        return res.send({ success: false, message: "Internal Server Error" });
-    }
-    const splitCookie = cookie.split("SESSION_ID=");
-    const sessionId = splitCookie[1];
-    const userIdString = await redis.get(sessionId);
-    if (!userIdString) {
+    const userId = await redis.extractUserId(cookie);
+
+    if (!userId) {
         return res.send({ success: false });
     }
-    const userId = parseInt(userIdString);
+
+    let token: Token | undefined;
+    // FUCK YOU JS
+    try {
+        token = await Token.findOne({ user: { id: userId } });
+    } catch (e) {
+        console.log(e);
+        return res.send({ success: false });
+    }
+    if (!token) {
+        return res.send({ success: false });
+    }
+
+    const refresh_token = token.refresh_token;
+    TrueLayer.refreshToken(refresh_token);
+    return res.send({ success: true });
+});
+
+//Endpoint validates current access token by making call to "accounts" TL endpoint
+router.get("/validate", async (req, res) => {
+    const cookie = req.headers["cookie"];
+    const userId = await redis.extractUserId(cookie);
 
     if (!userId) {
         return res.send({ success: false });
@@ -110,12 +83,11 @@ router.get("/validate", async(req,res) => {
     const access_token = token.access_token;
     const status = TrueLayer.validateToken(access_token);
 
-    if(!status){
+    if (!status) {
         return res.send({ success: false });
     }
-    
+
     return res.send({ success: true });
-})
+});
 
 export { router };
-

@@ -1,21 +1,24 @@
 <template>
     <div class="Home">
         <Navbar></Navbar>
-        <h2>Here is the information about your access token:</h2>
-        <div id="icon">
-            <img id="provider-img" v-bind:src="provider_logo" alt />
-        </div>
-        <div class="token-table">
-            <Table
-                v-bind:credentials_id="credentials_id"
-                v-bind:consent_status="consent_status"
-                v-bind:consent_status_created_at="consent_status_created_at"
-                v-bind:consent_status_expires_at="consent_status_expires_at"
-                v-bind:provider_name="provider_name"
-            />
-        </div>
-        <div class="button-container">
-            <div class="container">
+        <div class="container">
+            <div id="icon">
+                <div class="row">
+                    <img id="provider-img" v-bind:src="provider_logo" alt />
+                </div>
+            </div>
+            <div class="token-table">
+                <div class="row">
+                    <Table
+                        v-bind:credentials_id="credentials_id"
+                        v-bind:consent_status="consent_status"
+                        v-bind:consent_status_created_at="consent_status_created_at"
+                        v-bind:consent_status_expires_at="consent_status_expires_at"
+                        v-bind:provider_name="provider_name"
+                    />
+                </div>
+            </div>
+            <div class="button-container">
                 <div class="row">
                     <div class="col-sm">
                         <button
@@ -47,19 +50,24 @@
 <style>
 @import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
+html,
 body {
     margin: 0;
-    background-image: linear-gradient(135deg, #093554, #058ed8, #fef0d6);
+    height: 100%;
+    overflow: hidden;
     background-repeat: no-repeat;
     background-size: cover;
-    height: 100vh;
+}
+body {
+    background-color: #f6f7f9 !important;
 }
 h2 {
     font-family: "Lato", sans-serif;
-    color: white;
+    color: seashell;
     display: flex;
     justify-content: center;
     height: 11vh;
+    padding-top: 30px;
 }
 #provider-img {
     max-width: 3pc;
@@ -70,7 +78,8 @@ h2 {
     height: 10vh;
 }
 table {
-    background-color: white;
+    background-color: #fff;
+    font-family: "Courier New";
 }
 .token-table {
     height: 45vh;
@@ -99,6 +108,7 @@ table {
 import { Vue, Component } from "vue-property-decorator";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { IMe, Provider } from "../../../interfaces/IMe";
+import { Token } from "../../../app/entity/Token";
 import Table from "./components/Table.vue";
 import Navbar from "./components/Navbar.vue";
 import swal from "sweetalert";
@@ -130,6 +140,7 @@ export default class Home extends Vue {
             }
         };
 
+        // let response: AxiosResponse<Token[]>;
         let response: AxiosResponse<IMe>;
 
         try {
@@ -209,7 +220,7 @@ export default class Home extends Vue {
             );
         }
 
-        if (response.data.success === true) {
+        if (response.data.success) {
             swal("Done!", "Your token is valid", "success");
         } else {
             swal(

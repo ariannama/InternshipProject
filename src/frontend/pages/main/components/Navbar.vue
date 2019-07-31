@@ -10,7 +10,6 @@
             aria-label="Toggle navigation"
         >
             <span class="navbar-toggler-icon"></span>
-            <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <ul class="navbar-nav">

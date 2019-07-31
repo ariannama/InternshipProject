@@ -1,43 +1,93 @@
 <template>
     <div class="route">
-        <form class="form-signin">
-            <div class="form-label-group">
-                <input
-                    type="email"
-                    id="inputEmail"
-                    class="form-control"
-                    placeholder="Email address"
-                    required
-                    autofocus
-                    v-model="email"
-                />
-                <label for="email">Email address</label>
+        <div class="container">
+            <div class="col-lg-5" id="login">
+                <div class="icon">
+                    <img
+                        id="token-img"
+                        src="../../../../../token.svg"
+                        width="30"
+                        height="30"
+                        class="d-inline-block align-top"
+                        alt
+                    />
+                </div>
+                <form class="form-signin">
+                    <div class="form-label-group">
+                        <input
+                            type="email"
+                            id="inputEmail"
+                            class="form-control"
+                            placeholder="Email address"
+                            required
+                            autofocus
+                            v-model="email"
+                        />
+                        <label for="email">Email address:</label>
+                    </div>
+                    <div class="form-label-group">
+                        <input
+                            type="password"
+                            id="inputPassword"
+                            class="form-control"
+                            placeholder="Password"
+                            required
+                            v-model="password"
+                        />
+                        <label for="password">Password:</label>
+                    </div>
+                    <button
+                        class="btn btn-lg btn-primary btn-block"
+                        type="submit"
+                        @click.prevent="register"
+                    >Sign in</button>
+                    <p>
+                        Don't have an account?
+                        <router-link class="router-link" to="/register">&nbsp;Sign up</router-link>
+                    </p>
+                </form>
             </div>
-            <div class="form-label-group">
-                <input
-                    type="password"
-                    id="inputPassword"
-                    class="form-control"
-                    placeholder="Password"
-                    required
-                    v-model="password"
-                />
-                <label for="password">Password</label>
-            </div>
-            <button
-                class="btn btn-lg btn-primary btn-block"
-                type="submit"
-                @click.prevent="register"
-            >Sign in</button>
-        </form>
+        </div>
     </div>
 </template>
 
 <style>
 @import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
-button, .btn {
+button,
+.btn {
     font-family: "Lato", sans-serif;
+    background-color: #44689a !important;
+    border-color: #44689a !important;
+}
+.col-sm {
+    padding-right: 0;
+    padding-left: 0;
+}
+#login {
+    padding-top: 10px;
+    height: 345px !important;
+    border-radius: 0.25rem;
+    background-image: linear-gradient(#44689a 0 19%, white 0 79%);
+}
+.icon {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+img {
+    margin-top: 5px;
+    width: 45px;
+    height: 45px;
+}
+.col-lg {
+    flex: 0;
+}
+p {
+    margin-top: 1rem !important;
+    display: flex;
+    justify-content: center;
+    color: gray;
 }
 html,
 .bd-placeholder-img {
@@ -56,7 +106,7 @@ html,
 }
 
 .body {
-    height: 100%;
+    height: 100vh;
 }
 
 .body {
@@ -71,15 +121,13 @@ html,
 .form-signin {
     width: 100%;
     max-width: 420px;
-    padding: 15px;
     margin: auto;
-    margin-top: 100px;
-    border: 40px solid transparent;
-    background: white;
-    border-radius: 0.25rem;
+    margin-top: 27px;
+    background-color: transparent !important;
 }
 
 .form-label-group {
+    width: 100%;
     position: relative;
     margin-bottom: 1rem;
 }
@@ -142,9 +190,6 @@ html,
 }
 </style>
 
-
-
-
 <script lang="ts">
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import Vue from "vue";
@@ -180,8 +225,8 @@ export default class Login extends Vue {
         if (!response.data.success) {
             swal({
                 text: response.data.message,
-                icon: "error" 
-            })
+                icon: "error"
+            });
         } else {
             window.location.href = "/main/home.html";
         }

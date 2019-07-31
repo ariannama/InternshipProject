@@ -46,4 +46,27 @@ export default class redis {
             console.log(e);
         }
     }
+
+    static async extractUserId(cookie: string | undefined) {
+        let userId = undefined; 
+
+        if(!cookie) {
+            console.log()
+            return userId;
+        }
+        const splitCookie = cookie.split("SESSION_ID=");
+        const sessionId = splitCookie[1];
+        const userIdString = await redis.get(sessionId);
+        
+        if (!userIdString) {
+            return userId;
+        }
+        
+        userId = parseInt(userIdString);
+
+        if (!userId) {
+            return userId;
+        }
+        return userId;
+    }
 }

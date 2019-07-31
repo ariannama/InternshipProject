@@ -17,13 +17,7 @@ router.get("/callback", async (req, res) => {
     const credentials_id = meResult.credentials_id;
 
     const cookie = req.headers["cookie"];
-    if (!cookie) {
-        console.log("error");
-        return res.send({ message: "Internal Server Error" });
-    }
-    const splitCookie = cookie.split("SESSION_ID=");
-    const sessionId = splitCookie[1];
-    const userId = await redis.get(sessionId);
+    const userId = await redis.extractUserId(cookie);
     const user = await User.findOne({ where: { id: userId } });
 
     if (!user) {
