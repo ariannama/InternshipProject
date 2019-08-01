@@ -12,7 +12,7 @@
                         alt
                     />
                 </div>
-                <form class="form-signin">
+                <form class="form-signin" id="login-form">
                     <div class="form-label-group">
                         <input
                             type="email"
@@ -69,6 +69,12 @@ button,
     height: 345px !important;
     border-radius: 0.25rem;
     background-image: linear-gradient(#44689a 0 19%, white 0 79%);
+}
+
+@media (min-width: 992px) {
+    #login {
+        max-height: 350px;
+    }
 }
 .icon {
     display: flex;
@@ -219,7 +225,7 @@ export default class Login extends Vue {
         try {
             response = await axios(config);
         } catch (e) {
-            return alert("Internal Server Error");
+            return swal("Internal Server Error");
         }
 
         if (!response.data.success) {

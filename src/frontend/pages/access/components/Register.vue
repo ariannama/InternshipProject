@@ -81,11 +81,17 @@ button,
     height: 410px !important;
     border-radius: 0.25rem;
     background-image: linear-gradient(#44689a 0 15%, white 0 85%);
+    padding-top: 10px;
 }
 .icon {
     display: flex;
     justify-content: center;
     margin-bottom: 25px;
+}
+@media (min-width: 992px) {
+    #register {
+        min-height: 425px;
+    }
 }
 img {
     margin-top: 5px;
@@ -128,7 +134,7 @@ export default class Register extends Vue {
         try {
             response = await axios(config);
         } catch (e) {
-            return alert("Internal Server Error");
+            return swal("Internal Server Error");
         }
 
         if (!response.data.success) {

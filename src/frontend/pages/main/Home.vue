@@ -2,46 +2,15 @@
     <div class="Home">
         <Navbar></Navbar>
         <div class="container">
-            <div id="icon">
-                <div class="row">
-                    <img id="provider-img" v-bind:src="provider_logo" alt />
-                </div>
-            </div>
-            <div class="token-table">
-                <div class="row">
-                    <Table
-                        v-bind:credentials_id="credentials_id"
-                        v-bind:consent_status="consent_status"
-                        v-bind:consent_status_created_at="consent_status_created_at"
-                        v-bind:consent_status_expires_at="consent_status_expires_at"
-                        v-bind:provider_name="provider_name"
-                    />
-                </div>
-            </div>
-            <div class="button-container">
-                <div class="row">
-                    <div class="col-sm">
-                        <button
-                            @click="refresh"
-                            type="button"
-                            class="btn btn-primary btn-lg"
-                        >{{textRefresh}}</button>
-                    </div>
-                    <div class="col-sm">
-                        <button
-                            @click="validate"
-                            type="button"
-                            class="btn btn-primary btn-lg"
-                        >{{textValidate}}</button>
-                    </div>
-                    <div class="col-sm">
-                        <button
-                            @click="renew"
-                            type="button"
-                            class="btn btn-primary btn-lg"
-                        >{{textAdd}}</button>
-                    </div>
-                </div>
+            <div class="row">
+                <Table
+                    v-bind:credentials_id="credentials_id"
+                    v-bind:provider_name="provider_name"
+                    v-bind:consent_status="consent_status"
+                    v-bind:consent_status_created_at="consent_status_created_at"
+                    v-bind:consent_status_expires_at="consent_status_expires_at"
+                    v-bind:provider_icon="provider_logo"
+                />
             </div>
         </div>
     </div>
@@ -51,7 +20,8 @@
 @import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
 html,
-body {
+body,
+.home {
     margin: 0;
     height: 100%;
     overflow: hidden;
@@ -72,23 +42,12 @@ h2 {
 #provider-img {
     max-width: 3pc;
 }
-#icon {
+.container {
     display: flex;
+    align-items: center;
     justify-content: center;
-    height: 10vh;
-}
-table {
-    background-color: #fff;
-    font-family: "Courier New";
-}
-.token-table {
-    height: 45vh;
-}
-.button-container {
-    height: 23vh;
 }
 .btn-primary {
-    background-color: #f7ab1b !important;
     border: none !important;
     font-family: "Lato", sans-serif;
 }
@@ -159,76 +118,6 @@ export default class Home extends Vue {
         const provider: Provider = response.data.provider;
         this.provider_name = provider.display_name;
         this.provider_logo = provider.logo_uri;
-    }
-
-    async refresh() {
-        let config: AxiosRequestConfig = {
-            url: "http://localhost:3000/home/refresh",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        };
-
-        let response: AxiosResponse | undefined;
-
-        try {
-            response = await axios(config);
-        } catch (e) {
-            console.log(e);
-            return swal(
-                "Internal Server Error",
-                "Please, try again later",
-                "error"
-            );
-        }
-
-        if (response.data.success) {
-            swal(
-                "Done!",
-                "Your access token has been successfully refreshed",
-                "success"
-            );
-        } else {
-            swal(
-                "Something went wrong",
-                "We could not refresh your token - please, try again later",
-                "error"
-            );
-        }
-    }
-
-    async validate() {
-        let config: AxiosRequestConfig = {
-            url: "http://localhost:3000/home/validate",
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        };
-
-        let response: AxiosResponse | undefined;
-
-        try {
-            response = await axios(config);
-        } catch (e) {
-            console.log(e);
-            return swal(
-                "Internal Server Error",
-                "Please, try again later",
-                "error"
-            );
-        }
-
-        if (response.data.success) {
-            swal("Done!", "Your token is valid", "success");
-        } else {
-            swal(
-                "Something went wrong",
-                "Your token seems to not be valid - please, try entering a new token",
-                "error"
-            );
-        }
     }
 
     async renew() {
