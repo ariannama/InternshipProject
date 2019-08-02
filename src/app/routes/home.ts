@@ -14,10 +14,10 @@ router.get("/home", async (req, res) => {
         return res.send({ success: false });
     }
 
-    let tokens: Token | undefined;
+    let tokens: Token[] | undefined;
 
     try {
-        tokens = await Token.findOne({ user: { id: userId } });
+        tokens = await Token.find({ user: { id: userId } });
     } catch (e) {
         console.log(e);
         return res.send({ success: false });
@@ -26,11 +26,11 @@ router.get("/home", async (req, res) => {
         return res.send({ success: false });
     }
 
-    const access_token = tokens.access_token;
+    //const access_token = tokens.access_token;
 
-    const me = await TrueLayer.meEndpoint(access_token);
+    //const me = await TrueLayer.meEndpoint(access_token);
 
-    return res.send(me);
+    return res.send(tokens);
 });
 
 //Endpoint refreshes current access token

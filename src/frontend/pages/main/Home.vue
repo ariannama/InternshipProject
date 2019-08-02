@@ -1,8 +1,8 @@
 <template>
     <div class="Home">
-        <Navbar></Navbar>
-        <div class="container">
-            <div class="row">
+        <div class="Navbar">
+            <Navbar></Navbar>
+            <div class="Table">
                 <Table
                     v-bind:credentials_id="credentials_id"
                     v-bind:provider_name="provider_name"
@@ -20,8 +20,7 @@
 @import url("https://fonts.googleapis.com/css?family=Lato&display=swap");
 
 html,
-body,
-.home {
+body {
     margin: 0;
     height: 100%;
     overflow: hidden;
@@ -42,9 +41,12 @@ h2 {
 #provider-img {
     max-width: 3pc;
 }
-.container {
+.Table {
+    position: absolute;
+    bottom: 0;
+    top: 8vh;
+    width: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
 }
 .btn-primary {
@@ -67,10 +69,11 @@ h2 {
 import { Vue, Component } from "vue-property-decorator";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { IMe, Provider } from "../../../interfaces/IMe";
-import { Token } from "../../../app/entity/Token";
+import { ICreds } from "../../../interfaces/ICreds";
 import Table from "./components/Table.vue";
 import Navbar from "./components/Navbar.vue";
 import swal from "sweetalert";
+import Truelayer from "../../../app/services/truelayer";
 
 @Component({
     components: {
@@ -89,6 +92,7 @@ export default class Home extends Vue {
     textRefresh = "Refresh Token";
     textValidate = "Validate Token";
     textAdd = "Add Token";
+    rowData: [] = [];
 
     async mounted() {
         let config: AxiosRequestConfig = {
@@ -99,31 +103,37 @@ export default class Home extends Vue {
             }
         };
 
-        // let response: AxiosResponse<Token[]>;
-        let response: AxiosResponse<IMe>;
+        let response: AxiosResponse<ICreds[]>;
 
         try {
             response = await axios(config);
         } catch (e) {
-            return (this.credentials_id = "Failed to fetch");
+            return swal("Failed to fetch!");
         }
-        if (response.data.credentials_id === undefined) {
-            window.location.replace("http://localhost:3000/access/auth.html");
+        // if (!response.data.results) {
+        //     window.location.replace("http://localhost:3000/access/auth.html");
+        // }
+        console.log(response);
+        const tokens = response.data;
+        console.log(tokens);
+
+        for (const token of tokens) {
+            const access_token = token.access_token;
+            const me = await Truelayer.meEndpoint(access_token);
+            console.log(me);
+            if(!me){
+                return "fail";
+            }
+
+            this.credentials_id = me.credentials_id;
+            this.consent_status = me.consent_status;
+            this.consent_status_created_at = me.consent_created_at;
+            this.consent_status_expires_at = me.consent_expires_at;
+            const provider: Provider = me.provider;
+            this.provider_name = provider.display_name;
+            this.provider_logo = provider.logo_uri;
+            //add table row
         }
-
-        this.credentials_id = response.data.credentials_id;
-        this.consent_status = response.data.consent_status;
-        this.consent_status_created_at = response.data.consent_created_at;
-        this.consent_status_expires_at = response.data.consent_expires_at;
-        const provider: Provider = response.data.provider;
-        this.provider_name = provider.display_name;
-        this.provider_logo = provider.logo_uri;
-    }
-
-    async renew() {
-        window.location.assign(
-            "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false"
-        );
     }
 }
 </script>

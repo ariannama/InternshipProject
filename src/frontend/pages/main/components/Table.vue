@@ -1,9 +1,14 @@
 <template>
     <table class="table table-striped table-nonfluid">
         <thead>
-            <caption>
-                <b>Your access tokens</b>
-            </caption>
+            <div class="top">
+                <caption>
+                    <b>Your access tokens</b>
+                </caption>
+                <button type="button" class="btn btn-default btn-circle" @click="addToken">
+                    <img id="plus-img" src="https://img.icons8.com/windows/32/000000/plus.png">
+                </button>
+            </div>
             <tr>
                 <th scope="col">Provider</th>
                 <th scope="col">Credentials ID</th>
@@ -15,7 +20,7 @@
         <tbody>
             <tr>
                 <td id="provider-values">
-                    <img :src="provider_icon" />
+                    <img id="provider-logo" :src="provider_icon" />
                     &emsp;{{provider_name}}
                 </td>
                 <td>{{credentials_id}}</td>
@@ -50,11 +55,31 @@
 
 .table-nonfluid {
     width: auto !important;
+    min-height: 300px;
+    max-width: 100%;
+    margin-top: 100px;
     margin-left: auto;
     margin-right: auto;
     border-radius: 0.25rem;
     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
     background-color: #ffffff;
+}
+#plus-img {
+    margin-top: 3px;
+}
+.top {
+    width: 675% !important;
+    display: flex;
+    justify-content: space-between;
+}
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
 }
 td {
     min-width: 150px;
@@ -64,6 +89,7 @@ td {
 }
 #provider-values {
     display: flex;
+    padding-top: 22px;
     padding-left: 20px;
 }
 .category {
@@ -71,7 +97,7 @@ td {
 }
 .buttons {
     display: flex;
-    padding: 17px !important;
+    padding: 27px !important;
 }
 .btn-primary {
     background-color: #44689a !important    ;
@@ -91,7 +117,7 @@ caption {
 table {
     font-family: "Lato" sans-serif;
 }
-img {
+#provider-logo {
     width: 25px;
     height: 25px;
 }
@@ -102,7 +128,7 @@ img {
 import { Vue, Component, Prop } from "vue-property-decorator";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { IMe, Provider } from "../../../../interfaces/IMe";
-import { Token } from "../../../../app/entity/Token.ts";
+import { Token } from "../../../../app/entity/Token";
 import swal from "sweetalert";
 
 @Component
@@ -182,6 +208,12 @@ export default class Table extends Vue {
                 "error"
             );
         }
+    }
+
+    addToken() {
+        window.location.assign(
+            "https://auth.truelayer.com/?response_type=code&client_id=test-eb3e42&nonce=1535304510&scope=info%20accounts%20balance%20cards%20transactions%20direct_debits%20standing_orders%20products%20beneficiaries%20offline_access&redirect_uri=http://localhost:3000/callback/callback&enable_mock=true&enable_oauth_providers=true&enable_open_banking_providers=true&enable_credentials_sharing_providers=false"
+        );
     }
 }
 </script>
